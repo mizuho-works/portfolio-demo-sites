@@ -12,6 +12,18 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8002", "--directory", "02-salon-booking"],
       "port": 8002
+    },
+    {
+      "name": "corporate",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8003", "--directory", "03-corporate"],
+      "port": 8003
+    },
+    {
+      "name": "portfolio",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5174", "--directory", "../ポートフォリオサイト"],
+      "port": 5174
     }
   ]
 }

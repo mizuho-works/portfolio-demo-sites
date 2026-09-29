@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お問い合わせ | SILENZIO(シレンツィオ)建築設計事務所</title>
+<meta name="description" content="SILENZIOへのお問い合わせページです。新築・リノベーションのご相談、採用に関するお問い合わせなど、お気軽にご連絡ください。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Shippori+Mincho:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header" id="header">
+  <div class="container header__inner">
+    <a href="index.html" class="logo">SILENZIO<span>.</span></a>
+    <button class="nav-toggle" id="navToggle" aria-label="メニューを開く">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav">
+      <ul>
+        <li><a href="about.html">ABOUT</a></li>
+        <li><a href="service.html">SERVICE</a></li>
+        <li><a href="recruit.html">RECRUIT</a></li>
+        <li><a href="contact.html" class="is-current">CONTACT</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-hero">
+    <div class="page-hero__image">
+      <img src="images/contact-hero.jpg" alt="家具を備えたモダンなオフィスラウンジエリア">
+    </div>
+    <div class="page-hero__overlay"></div>
+    <div class="container page-hero__content">
+      <p class="page-hero__eyebrow">Contact</p>
+      <h1 class="page-hero__title">CONTACT</h1>
+      <p class="page-hero__jp">お問い合わせ</p>
+      <p class="breadcrumb"><a href="index.html">HOME</a> / CONTACT</p>
+    </div>
+  </section>
+
+  <section class="section section--white">
+    <div class="container">
+      <p class="section__lead section__lead--center">
+        新築・リノベーションのご相談、資料請求、採用に関するお問い合わせなど、<br class="sp-only">お気軽にご連絡ください。担当者より2営業日以内にご返信いたします。
+      </p>
+
+      <div class="contact-layout">
+        <div class="contact-info reveal">
+          <dl>
+            <div class="contact-info__row">
+              <dt>所在地</dt>
+              <dd>〒150-0001<br>東京都渋谷区神宮前5-2-X<br>SILENZIO BLDG 4F</dd>
+            </div>
+            <div class="contact-info__row">
+              <dt>TEL</dt>
+              <dd>03-6455-XXXX</dd>
+            </div>
+            <div class="contact-info__row">
+              <dt>MAIL</dt>
+              <dd>info@silenzio-arch.jp</dd>
+            </div>
+            <div class="contact-info__row">
+              <dt>営業時間</dt>
+              <dd>10:00〜18:00(土日祝定休)</dd>
+            </div>
+            <div class="contact-info__row">
+              <dt>アクセス</dt>
+              <dd>東京メトロ千代田線「明治神宮前駅」徒歩6分</dd>
+            </div>
+          </dl>
+          <div class="contact-info__map">
+            <iframe src="https://maps.google.com/maps?q=%E6%98%8E%E6%B2%BB%E7%A5%9E%E5%AE%AE%E5%89%8D%E9%A7%85&t=&z=15&ie=UTF8&iwloc=&output=embed" title="SILENZIO所在地マップ" loading="lazy"></iframe>
+          </div>
+        </div>
+
+        <form class="contact-form reveal" id="contactForm" novalidate>
+          <div class="form-row">
+            <label for="company">会社名・組織名</label>
+            <input type="text" id="company" name="company" placeholder="株式会社〇〇">
+          </div>
+          <div class="form-row form-row--split">
+            <div>
+              <label for="name">お名前<span class="required">必須</span></label>
+              <input type="text" id="name" name="name" placeholder="山田 太郎">
+              <p class="form-error"></p>
+            </div>
+            <div>
+              <label for="tel">電話番号</label>
+              <input type="tel" id="tel" name="tel" placeholder="090-1234-5678">
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="email">メールアドレス<span class="required">必須</span></label>
+            <input type="email" id="email" name="email" placeholder="example@mail.com">
+            <p class="form-error"></p>
+          </div>
+          <div class="form-row">
+            <label for="subject">ご用件<span class="required">必須</span></label>
+            <select id="subject" name="subject">
+              <option value="">選択してください</option>
+              <option value="new">新築のご相談</option>
+              <option value="renovation">リノベーションのご相談</option>
+              <option value="interior">インテリアデザインのご相談</option>
+              <option value="recruit">採用について</option>
+              <option value="other">その他</option>
+            </select>
+            <p class="form-error"></p>
+          </div>
+          <div class="form-row">
+            <label for="message">お問い合わせ内容<span class="required">必須</span></label>
+            <textarea id="message" name="message" rows="6" placeholder="ご相談内容やご質問をご記入ください。"></textarea>
+            <p class="form-error"></p>
+          </div>
+          <div class="form-row">
+            <label class="form-check">
+              <input type="checkbox" id="agree" name="agree">
+              <span><a href="#">プライバシーポリシー</a>に同意の上、送信します。<span class="required">必須</span></span>
+            </label>
+            <p class="form-error"></p>
+          </div>
+          <button type="submit" class="btn btn--block">送信する</button>
+          <p class="form-success" id="formSuccess"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div>
+        <a href="index.html" class="footer__logo">SILENZIO</a>
+        <p class="footer__desc">静けさの中に本質を宿す建築を。余白と素材を大切にした設計とインテリアで、上質な時間が流れる空間をつくる建築設計事務所です。</p>
+      </div>
+      <div>
+        <p class="footer__heading">MENU</p>
+        <ul class="footer__nav">
+          <li><a href="about.html">会社概要</a></li>
+          <li><a href="service.html">事業内容</a></li>
+          <li><a href="recruit.html">採用情報</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer__heading">CONTACT</p>
+        <p class="footer__info">
+          〒150-0001<br>
+          東京都渋谷区神宮前5-2-X SILENZIO BLDG 4F<br>
+          TEL 03-6455-XXXX<br>
+          MAIL info@silenzio-arch.jp
+        </p>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; 2026 SILENZIO Architects. All Rights Reserved.</p>
+      <p>※本サイトはポートフォリオ用のデモサイトです。架空の企業情報を掲載しています。</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
