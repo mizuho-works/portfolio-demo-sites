@@ -98,7 +98,7 @@
   document.querySelectorAll(".gallery-item").forEach((item) => {
     item.addEventListener("click", () => {
       document.getElementById("galleryModalImg").src = item.dataset.full;
-      document.getElementById("galleryModalImg").alt = item.dataset.caption + "(ダミー画像)";
+      document.getElementById("galleryModalImg").alt = item.dataset.caption;
       document.getElementById("galleryModalCaption").textContent = item.dataset.caption;
       openModal("gallery");
     });
@@ -131,7 +131,7 @@
   let viewYear = today.getFullYear();
   let viewMonth = today.getMonth();
 
-  const closedWeekday = 2; // Tuesday
+  const closedWeekday = 1; // Monday
 
   const formatDate = (d) => `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 
