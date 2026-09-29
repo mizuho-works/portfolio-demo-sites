@@ -138,10 +138,26 @@ ul {
 }
 
 .nav a {
-  font-size: 0.9rem;
-  letter-spacing: 0.04em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
+}
+
+.nav-en {
+  font-family: var(--font-serif-en);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
+}
+
+.nav-jp {
+  font-family: var(--font-sans-jp);
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  color: var(--color-text-light);
+  margin-top: 3px;
 }
 
 .nav a::after {
@@ -601,8 +617,12 @@ ul {
     gap: 40px;
   }
 
-  .nav a {
-    font-size: 1.1rem;
+  .nav-en {
+    font-size: 1.3rem;
+  }
+
+  .nav-jp {
+    font-size: 0.75rem;
   }
 
   .nav-toggle {
