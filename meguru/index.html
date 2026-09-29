@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEGURU(めぐる) | 港町なぞとき周遊イベント</title>
+<meta name="description" content="潮風ベイエリアを舞台にした家族向けなぞとき周遊イベント「MEGURU(めぐる)」。まちにかくされたヒントをたどって、海辺のまちをめぐろう。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header" id="header">
+  <div class="container header__inner">
+    <a href="#top" class="logo">
+      <span class="logo__mark">MEGURU</span>
+      <span class="logo__sub">めぐる</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="メニューを開く">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav">
+      <ul>
+        <li><a href="#concept">イベントについて</a></li>
+        <li><a href="#howto">あそびかた</a></li>
+        <li><a href="#courses">コース紹介</a></li>
+        <li><a href="#info">開催概要</a></li>
+        <li><a href="#faq">よくある質問</a></li>
+      </ul>
+      <a href="#entry" class="btn btn--nav">参加する</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero" id="top">
+    <div class="hero__deco hero__deco--sun">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42"/></svg>
+    </div>
+    <div class="hero__waves">
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none"><path d="M0,64 C240,120 480,0 720,48 C960,96 1200,32 1440,64 L1440,120 L0,120 Z"/></svg>
+    </div>
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <p class="hero__badge">港町なぞとき周遊イベント</p>
+        <h1 class="hero__title">MEGURU<span class="hero__title-sub">めぐる</span></h1>
+        <p class="hero__lead">まちにかくされたヒントをたどって、<br>海辺のまちを家族でめぐろう。</p>
+        <div class="hero__meta">
+          <span class="chip">2026.4.4 SAT - 5.6 WED</span>
+          <span class="chip chip--alt">潮風ベイエリア一帯</span>
+        </div>
+        <div class="hero__actions">
+          <a href="#howto" class="btn btn--primary">あそびかたを見る</a>
+          <a href="#courses" class="btn btn--outline">コースをさがす</a>
+        </div>
+      </div>
+      <div class="hero__art">
+        <svg viewBox="0 0 420 420" class="illust-town">
+          <circle cx="210" cy="210" r="200" class="illust-town__bg"/>
+          <rect x="60" y="230" width="60" height="90" rx="6" class="illust-town__building illust-town__building--1"/>
+          <rect x="130" y="200" width="70" height="120" rx="6" class="illust-town__building illust-town__building--2"/>
+          <rect x="210" y="240" width="55" height="80" rx="6" class="illust-town__building illust-town__building--1"/>
+          <polygon points="330,150 300,230 360,230" class="illust-town__roof"/>
+          <rect x="305" y="230" width="50" height="90" rx="4" class="illust-town__building illust-town__building--2"/>
+          <rect x="150" y="150" width="16" height="70" class="illust-town__tower"/>
+          <circle cx="158" cy="140" r="16" class="illust-town__towertop"/>
+          <path d="M40,330 Q210,300 380,330 L380,340 Q210,320 40,340 Z" class="illust-town__pier"/>
+          <path d="M0,350 Q105,330 210,350 T420,350 L420,420 L0,420 Z" class="illust-town__sea"/>
+          <path d="M60,300 Q80,270 120,290 Q100,260 140,255" class="illust-town__boat" fill="none"/>
+          <g class="illust-town__bird">
+            <path d="M0,0 Q8,-8 16,0 Q8,-4 0,0" />
+          </g>
+          <g class="illust-town__bird" transform="translate(60,20)">
+            <path d="M0,0 Q8,-8 16,0 Q8,-4 0,0" />
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="section concept" id="concept">
+    <div class="container concept__grid">
+      <div class="concept__art">
+        <svg viewBox="0 0 300 300" class="illust-map">
+          <rect x="20" y="20" width="260" height="260" rx="18" class="illust-map__paper"/>
+          <path d="M50,90 Q120,50 160,100 T260,120" class="illust-map__route"/>
+          <circle cx="50" cy="90" r="10" class="illust-map__pin illust-map__pin--start"/>
+          <circle cx="160" cy="100" r="8" class="illust-map__pin"/>
+          <circle cx="260" cy="120" r="10" class="illust-map__pin illust-map__pin--end"/>
+          <path d="M70,180 Q140,150 180,190 T240,210" class="illust-map__route illust-map__route--alt"/>
+          <text x="150" y="255" class="illust-map__text">MEGURU MAP</text>
+        </svg>
+      </div>
+      <div class="concept__text">
+        <p class="section__eyebrow">Concept</p>
+        <h2 class="section__title">まちごと、ひとつの謎解きに。</h2>
+        <p class="concept__body">
+          「MEGURU(めぐる)」は、潮風ベイエリアのお店や広場、灯台に隠された謎をたどりながら、まち全体をめぐるなぞとき周遊イベントです。
+        </p>
+        <p class="concept__body">
+          スマホは使わず、紙のマップとヒントカードだけで遊べるアナログな体験。歩いて、見つけて、考えて——家族みんなで「めぐり会う」時間をつくります。
+        </p>
+        <ul class="concept__points">
+          <li>所要時間の目安は 90〜120分</li>
+          <li>スタート地点でマップとヒントセットをお渡し</li>
+          <li>ゴールで記念のオリジナルバッジをプレゼント</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section howto" id="howto">
+    <div class="container">
+      <p class="section__eyebrow section__eyebrow--center">How to Play</p>
+      <h2 class="section__title section__title--center">あそびかたは、たったの4ステップ</h2>
+      <div class="howto__grid">
+        <article class="howto-card">
+          <div class="howto-card__num">01</div>
+          <div class="howto-card__icon">
+            <svg viewBox="0 0 64 64"><rect x="12" y="8" width="40" height="48" rx="4"/><path d="M20 20h24M20 30h24M20 40h14" class="stroke"/></svg>
+          </div>
+          <h3 class="howto-card__title">マップを受け取る</h3>
+          <p class="howto-card__desc">受付でマップとヒントカードのセットをゲット。</p>
+        </article>
+        <article class="howto-card">
+          <div class="howto-card__num">02</div>
+          <div class="howto-card__icon">
+            <svg viewBox="0 0 64 64"><circle cx="26" cy="26" r="16"/><line x1="37" y1="37" x2="52" y2="52" class="stroke stroke--thick"/></svg>
+          </div>
+          <h3 class="howto-card__title">まちでヒントをさがす</h3>
+          <p class="howto-card__desc">お店の看板や広場のモニュメントにかくれたヒントを発見。</p>
+        </article>
+        <article class="howto-card">
+          <div class="howto-card__num">03</div>
+          <div class="howto-card__icon">
+            <svg viewBox="0 0 64 64"><path d="M32 8v48M8 32h48" class="stroke stroke--thick"/><circle cx="32" cy="32" r="26"/></svg>
+          </div>
+          <h3 class="howto-card__title">なぞをといて次へ</h3>
+          <p class="howto-card__desc">わかった答えが、次に向かう場所のヒントになります。</p>
+        </article>
+        <article class="howto-card">
+          <div class="howto-card__num">04</div>
+          <div class="howto-card__icon">
+            <svg viewBox="0 0 64 64"><rect x="14" y="24" width="36" height="28" rx="4"/><path d="M14 24l18-14 18 14" class="stroke stroke--thick" fill="none"/><circle cx="32" cy="38" r="6"/></svg>
+          </div>
+          <h3 class="howto-card__title">ゴールでバッジGET</h3>
+          <p class="howto-card__desc">すべて解き終えたら、記念のオリジナルバッジをプレゼント。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section courses" id="courses">
+    <div class="container">
+      <p class="section__eyebrow section__eyebrow--center">Courses</p>
+      <h2 class="section__title section__title--center">3つのコースからえらべる</h2>
+      <div class="courses__grid">
+        <article class="course-card course-card--kirakira">
+          <span class="course-card__badge">初級</span>
+          <h3 class="course-card__title">きらきらコース</h3>
+          <p class="course-card__desc">小さなお子さまと一緒でも安心。やさしいなぞなぞ中心の、はじめての親子向けコース。</p>
+          <dl class="course-card__meta">
+            <div><dt>所要時間</dt><dd>約60分</dd></div>
+            <div><dt>対象</dt><dd>4歳〜(保護者同伴)</dd></div>
+            <div><dt>参加費</dt><dd>1組 ¥800</dd></div>
+          </dl>
+        </article>
+        <article class="course-card course-card--namikaze">
+          <span class="course-card__badge">中級</span>
+          <h3 class="course-card__title">なみかぜコース</h3>
+          <p class="course-card__desc">MEGURUの定番コース。歩いて考えて、ちょうどいい歯ごたえのなぞときを楽しめます。</p>
+          <dl class="course-card__meta">
+            <div><dt>所要時間</dt><dd>約90分</dd></div>
+            <div><dt>対象</dt><dd>小学生〜大人</dd></div>
+            <div><dt>参加費</dt><dd>1組 ¥1,200</dd></div>
+          </dl>
+        </article>
+        <article class="course-card course-card--arashi">
+          <span class="course-card__badge">上級</span>
+          <h3 class="course-card__title">あらしコース</h3>
+          <p class="course-card__desc">歯ごたえ抜群、複合型のなぞときに挑戦。友人・カップルでの本気プレイにおすすめ。</p>
+          <dl class="course-card__meta">
+            <div><dt>所要時間</dt><dd>約120分</dd></div>
+            <div><dt>対象</dt><dd>中学生〜大人</dd></div>
+            <div><dt>参加費</dt><dd>1組 ¥1,600</dd></div>
+          </dl>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section info" id="info">
+    <div class="container info__grid">
+      <div class="info__text">
+        <p class="section__eyebrow">Event Info</p>
+        <h2 class="section__title">開催概要</h2>
+        <dl class="info__list">
+          <div class="info__row">
+            <dt>イベント名</dt>
+            <dd>港町なぞとき周遊イベント MEGURU(めぐる)</dd>
+          </div>
+          <div class="info__row">
+            <dt>開催期間</dt>
+            <dd>2026年4月4日(土)〜5月6日(水・祝)<br>※月曜定休(祝日をのぞく)</dd>
+          </div>
+          <div class="info__row">
+            <dt>開催時間</dt>
+            <dd>10:00〜16:00(最終受付 14:00)</dd>
+          </div>
+          <div class="info__row">
+            <dt>受付場所</dt>
+            <dd>潮風ベイエリア案内所<br>(潮見町2-8-1 ベイターミナル1F)</dd>
+          </div>
+          <div class="info__row">
+            <dt>参加方法</dt>
+            <dd>当日受付・事前予約どちらも可</dd>
+          </div>
+        </dl>
+      </div>
+      <div class="info__map">
+        <iframe
+          title="MEGURU受付案内所マップ"
+          src="https://www.google.com/maps?q=%E6%B8%AF%E3%81%BE%E3%81%A1&output=embed"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <section class="section faq" id="faq">
+    <div class="container faq__inner">
+      <p class="section__eyebrow section__eyebrow--center">FAQ</p>
+      <h2 class="section__title section__title--center">よくある質問</h2>
+      <div class="faq__list">
+        <details class="faq-item">
+          <summary>雨の日でも開催しますか？</summary>
+          <p>小雨決行です。荒天の場合は公式SNSにて中止をお知らせします。</p>
+        </details>
+        <details class="faq-item">
+          <summary>スマートフォンは必要ですか？</summary>
+          <p>紙のマップとヒントカードだけで遊べます。スマホがなくても安心してご参加いただけます。</p>
+        </details>
+        <details class="faq-item">
+          <summary>当日、参加人数を変更できますか？</summary>
+          <p>可能です。受付にてお申し出ください。追加分の参加費を頂戴いたします。</p>
+        </details>
+        <details class="faq-item">
+          <summary>途中で終わらせることはできますか？</summary>
+          <p>はい、コースの途中離脱もできます。再開したい場合は受付にてお声がけください。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section entry" id="entry">
+    <div class="container entry__inner">
+      <p class="section__eyebrow section__eyebrow--center">Entry</p>
+      <h2 class="section__title section__title--center">参加予約</h2>
+      <p class="entry__lead">事前予約で当日の受付がスムーズになります。ご家族・グループでのご参加、お待ちしています。</p>
+
+      <form class="entry-form" id="entryForm" novalidate>
+        <div class="form-row">
+          <label for="name">お名前<span class="required">必須</span></label>
+          <input type="text" id="name" name="name" required>
+          <p class="form-error" data-error-for="name"></p>
+        </div>
+        <div class="form-row">
+          <label for="email">メールアドレス<span class="required">必須</span></label>
+          <input type="email" id="email" name="email" required>
+          <p class="form-error" data-error-for="email"></p>
+        </div>
+        <div class="form-row">
+          <label for="course">参加コース<span class="required">必須</span></label>
+          <select id="course" name="course" required>
+            <option value="">選択してください</option>
+            <option value="kirakira">きらきらコース(初級)</option>
+            <option value="namikaze">なみかぜコース(中級)</option>
+            <option value="arashi">あらしコース(上級)</option>
+          </select>
+          <p class="form-error" data-error-for="course"></p>
+        </div>
+        <div class="form-row">
+          <label for="date">参加希望日</label>
+          <input type="date" id="date" name="date">
+        </div>
+        <div class="form-row">
+          <label for="people">人数</label>
+          <select id="people" name="people">
+            <option value="">選択してください</option>
+            <option value="1-2">1〜2名</option>
+            <option value="3-4">3〜4名</option>
+            <option value="5+">5名以上</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn--primary btn--block">この内容で予約する</button>
+        <p class="form-success" id="formSuccess" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <p class="footer__logo">MEGURU</p>
+    <p class="footer__copy">&copy; 2026 MEGURU 実行委員会. All Rights Reserved.</p>
+    <p class="footer__note">※本サイトはポートフォリオ用のデモサイトです。イベント・地名・団体名は架空のものです。</p>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

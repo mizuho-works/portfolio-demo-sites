@@ -36,6 +36,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8005", "--directory", "kids-fashion"],
       "port": 8005
+    },
+    {
+      "name": "meguru",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8007", "--directory", "meguru"],
+      "port": 8007
     }
   ]
 }
