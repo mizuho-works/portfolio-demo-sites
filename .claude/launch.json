@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8001", "--directory", "01-cafe-lp"],
       "port": 8001
+    },
+    {
+      "name": "salon-booking",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8002", "--directory", "02-salon-booking"],
+      "port": 8002
     }
   ]
 }
