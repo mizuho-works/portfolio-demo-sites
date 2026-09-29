@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お問い合わせ | Solidus Precision(ソリダス・プレシジョン)</title>
+<meta name="description" content="Solidus Precisionへのお問い合わせページ。加工のご相談、お見積り依頼、資料請求などお気軽にお問い合わせください。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="header" id="header">
+  <div class="container header__inner">
+    <a href="index.html" class="logo">Solidus Precision<span>ソリダス・プレシジョン</span></a>
+    <button class="nav-toggle" id="navToggle" aria-label="メニューを開く">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav">
+      <ul>
+        <li><a href="index.html">TOP</a></li>
+        <li><a href="about.html">企業情報</a></li>
+        <li><a href="service.html">事業内容</a></li>
+        <li><a href="contact.html" class="is-current">お問い合わせ</a></li>
+        <li><a href="contact.html" class="btn btn--accent">お見積り相談</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="page-header">
+    <div class="container">
+      <p class="page-header__eyebrow">Contact</p>
+      <h1 class="page-header__title">お問い合わせ</h1>
+      <p class="breadcrumb"><a href="index.html">TOP</a> / お問い合わせ</p>
+    </div>
+  </section>
+
+  <section class="section contact">
+    <div class="container">
+      <p class="section__eyebrow section__eyebrow--center">Get in touch</p>
+      <h2 class="section__title section__title--center">お見積り・ご相談</h2>
+      <p class="section__lead section__lead--center">加工のご相談、お見積り依頼、資料請求、採用に関するお問い合わせなど、下記フォームまたはお電話にて承っております。</p>
+
+      <div class="contact__grid">
+        <div class="contact-info">
+          <p class="contact-info__title">Contact Information</p>
+          <div class="contact-info__row">
+            <p class="contact-info__label">TEL</p>
+            <p class="contact-info__value contact-info__value--big">06-1234-5678</p>
+          </div>
+          <div class="contact-info__row">
+            <p class="contact-info__label">FAX</p>
+            <p class="contact-info__value">06-1234-5679</p>
+          </div>
+          <div class="contact-info__row">
+            <p class="contact-info__label">受付時間</p>
+            <p class="contact-info__value">9:00〜18:00(土日祝休)</p>
+          </div>
+          <div class="contact-info__row">
+            <p class="contact-info__label">所在地</p>
+            <p class="contact-info__value">〒577-0013<br>大阪府東大阪市高井田本通3-5-12</p>
+          </div>
+        </div>
+
+        <form class="contact-form" id="contactForm" novalidate>
+          <div class="form-row-group">
+            <div class="form-row">
+              <label for="company">会社名<span class="required">必須</span></label>
+              <input type="text" id="company" name="company" required>
+              <p class="form-error" data-error-for="company"></p>
+            </div>
+            <div class="form-row">
+              <label for="name">ご担当者名<span class="required">必須</span></label>
+              <input type="text" id="name" name="name" required>
+              <p class="form-error" data-error-for="name"></p>
+            </div>
+          </div>
+          <div class="form-row-group">
+            <div class="form-row">
+              <label for="email">メールアドレス<span class="required">必須</span></label>
+              <input type="email" id="email" name="email" required>
+              <p class="form-error" data-error-for="email"></p>
+            </div>
+            <div class="form-row">
+              <label for="tel">電話番号<span class="optional">任意</span></label>
+              <input type="tel" id="tel" name="tel">
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="inquiryType">お問い合わせ種別<span class="required">必須</span></label>
+            <select id="inquiryType" name="inquiryType" required>
+              <option value="">選択してください</option>
+              <option value="quote">加工のご相談・お見積り依頼</option>
+              <option value="prototype">試作開発のご相談</option>
+              <option value="document">資料請求</option>
+              <option value="recruit">採用について</option>
+              <option value="other">その他</option>
+            </select>
+            <p class="form-error" data-error-for="inquiryType"></p>
+          </div>
+          <div class="form-row">
+            <label for="message">お問い合わせ内容<span class="required">必須</span></label>
+            <textarea id="message" name="message" rows="6" required></textarea>
+            <p class="form-error" data-error-for="message"></p>
+          </div>
+          <button type="submit" class="btn btn--accent">送信する</button>
+          <p class="form-success" id="formSuccess" role="status"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__inner">
+      <div>
+        <a href="index.html" class="footer__logo">Solidus Precision</a>
+        <p class="footer__desc">1976年創業。精密切削加工・精密板金加工を通じて、自動車・半導体製造装置・医療機器分野のものづくりを支えています。</p>
+        <p class="footer__addr">〒577-0013<br>大阪府東大阪市高井田本通3-5-12</p>
+      </div>
+      <div>
+        <p class="footer__heading">Sitemap</p>
+        <ul class="footer__nav">
+          <li><a href="index.html">TOP</a></li>
+          <li><a href="about.html">企業情報</a></li>
+          <li><a href="service.html">事業内容</a></li>
+          <li><a href="contact.html">お問い合わせ</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer__heading">Contact</p>
+        <ul class="footer__nav">
+          <li>TEL 06-1234-5678</li>
+          <li>FAX 06-1234-5679</li>
+          <li>受付 9:00-18:00(土日祝休)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <p>&copy; 2026 Solidus Precision Co., Ltd.</p>
+      <p class="footer__note">※本サイトはポートフォリオ用のデモサイトです。企業名・情報は架空のものです。</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
