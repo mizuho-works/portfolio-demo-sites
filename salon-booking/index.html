@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ambre hair&amp;nail | 表参道の隠れ家サロン</title>
-<meta name="description" content="Ambre hair&nail(アンブレ ヘア&ネイル)は表参道の隠れ家的美容室・ネイルサロン。スタイリスト紹介、料金表、ギャラリー、WEB予約に対応したデモサイトです。">
+<meta name="description" content="Ambre hair&nail(アンブレ ヘア&ネイル)は表参道の隠れ家的美容室・ネイルサロン。料金表、ギャラリー、WEB予約に対応したデモサイトです。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -21,7 +21,6 @@
 
   <nav class="nav-desktop" aria-label="メインナビゲーション">
     <a href="#concept">Concept</a>
-    <a href="#staff">Staff</a>
     <a href="#menu">Menu</a>
     <a href="#gallery">Gallery</a>
     <a href="#reserve" class="nav-cta">WEB予約</a>
@@ -35,7 +34,6 @@
 <!-- ==================== MOBILE NAV OVERLAY ==================== -->
 <nav class="nav-mobile" id="navMobile" aria-label="モバイルナビゲーション">
   <a href="#concept" class="nav-mobile-link">Concept</a>
-  <a href="#staff" class="nav-mobile-link">Staff</a>
   <a href="#menu" class="nav-mobile-link">Menu</a>
   <a href="#gallery" class="nav-mobile-link">Gallery</a>
   <a href="#access" class="nav-mobile-link">Access</a>
@@ -46,7 +44,10 @@
 
   <!-- ==================== HERO ==================== -->
   <section class="hero">
-    <div class="hero-media" aria-hidden="true"></div>
+    <div class="hero-media">
+      <img src="images/hero-salon.jpg" alt="Ambreの店内、自然光が差し込む落ち着いたプライベートサロン空間">
+    </div>
+    <div class="hero-overlay" aria-hidden="true"></div>
     <div class="hero-inner reveal">
       <p class="hero-eyebrow">Omotesando Hidden Salon</p>
       <h1 class="hero-title">Ambre</h1>
@@ -62,7 +63,7 @@
   <!-- ==================== CONCEPT ==================== -->
   <section class="concept" id="concept">
     <div class="concept-media reveal">
-      <img src="https://placehold.jp/ecd9cf/3a2e28/700x880.png?text=Salon%20Interior" alt="サロン内観のイメージ画像(ダミー)" loading="lazy">
+      <img src="images/concept-interior.jpg" alt="Ambre店内、プライベート個室のイメージ" loading="lazy">
     </div>
     <div class="concept-body reveal">
       <span class="section-num">Concept</span>
@@ -85,59 +86,6 @@
           <dd>10:00 - 20:00(最終受付19:00) / 火曜定休</dd>
         </div>
       </dl>
-    </div>
-  </section>
-
-  <!-- ==================== STAFF ==================== -->
-  <section class="staff" id="staff">
-    <div class="section-head reveal">
-      <span class="section-num">Staff</span>
-      <h2 class="section-title">スタッフ紹介</h2>
-      <p class="section-desc">経験豊富なスタイリスト・ネイリストが、お客様一人ひとりに寄り添います。<br class="br-mobile">写真をクリックすると詳細をご覧いただけます。</p>
-    </div>
-
-    <div class="staff-grid">
-
-      <button class="staff-card reveal" type="button" data-staff="rina">
-        <div class="staff-photo">
-          <img src="https://placehold.jp/e3c9bb/3a2e28/500x600.png?text=Rina" alt="スタイリスト 早坂 凛(ダミー写真)" loading="lazy">
-        </div>
-        <div class="staff-info">
-          <span class="staff-role">Director / Stylist</span>
-          <h3 class="staff-name">早坂 凛 <span class="staff-name-en">Rin Hayasaka</span></h3>
-        </div>
-      </button>
-
-      <button class="staff-card reveal" type="button" data-staff="yuki">
-        <div class="staff-photo">
-          <img src="https://placehold.jp/d9c4b8/3a2e28/500x600.png?text=Yuki" alt="スタイリスト 三浦 結希(ダミー写真)" loading="lazy">
-        </div>
-        <div class="staff-info">
-          <span class="staff-role">Stylist</span>
-          <h3 class="staff-name">三浦 結希 <span class="staff-name-en">Yuki Miura</span></h3>
-        </div>
-      </button>
-
-      <button class="staff-card reveal" type="button" data-staff="sara">
-        <div class="staff-photo">
-          <img src="https://placehold.jp/ead6c8/3a2e28/500x600.png?text=Sara" alt="ネイリスト 藤井 紗良(ダミー写真)" loading="lazy">
-        </div>
-        <div class="staff-info">
-          <span class="staff-role">Nail Artist</span>
-          <h3 class="staff-name">藤井 紗良 <span class="staff-name-en">Sara Fujii</span></h3>
-        </div>
-      </button>
-
-      <button class="staff-card reveal" type="button" data-staff="mei">
-        <div class="staff-photo">
-          <img src="https://placehold.jp/dfcab9/3a2e28/500x600.png?text=Mei" alt="スタイリスト 中村 芽依(ダミー写真)" loading="lazy">
-        </div>
-        <div class="staff-info">
-          <span class="staff-role">Junior Stylist</span>
-          <h3 class="staff-name">中村 芽依 <span class="staff-name-en">Mei Nakamura</span></h3>
-        </div>
-      </button>
-
     </div>
   </section>
 
@@ -208,33 +156,33 @@
     <div class="section-head reveal">
       <span class="section-num">Gallery</span>
       <h2 class="section-title">Instagram Gallery</h2>
-      <p class="section-desc">サロンワークの一部をご紹介します。写真はダミー画像です。</p>
+      <p class="section-desc">サロンワークの一部をご紹介します。</p>
       <a href="#" class="gallery-ig" target="_blank" rel="noopener">@ambre_hair_nail を見る ↗</a>
     </div>
 
     <div class="gallery-grid" id="galleryGrid">
-      <button class="gallery-item reveal" type="button" data-full="https://placehold.jp/e3c9bb/3a2e28/900x900.png?text=Look%2001" data-caption="透明感カラーのレイヤーボブ">
-        <img src="https://placehold.jp/e3c9bb/3a2e28/500x500.png?text=Look%2001" alt="サロンワーク例1(ダミー)" loading="lazy">
+      <button class="gallery-item reveal" type="button" data-full="images/gallery-bob-color.jpg" data-caption="透明感カラーのレイヤーボブ">
+        <img src="images/gallery-bob-color.jpg" alt="透明感カラーのレイヤーボブ" loading="lazy">
         <span class="gallery-overlay">♡ 128</span>
       </button>
-      <button class="gallery-item reveal" type="button" data-full="https://placehold.jp/d9c4b8/3a2e28/900x900.png?text=Look%2002" data-caption="秋色オレンジブラウンカラー">
-        <img src="https://placehold.jp/d9c4b8/3a2e28/500x500.png?text=Look%2002" alt="サロンワーク例2(ダミー)" loading="lazy">
+      <button class="gallery-item reveal" type="button" data-full="images/gallery-orange-brown.jpg" data-caption="秋色オレンジブラウンカラー">
+        <img src="images/gallery-orange-brown.jpg" alt="秋色オレンジブラウンカラー" loading="lazy">
         <span class="gallery-overlay">♡ 94</span>
       </button>
-      <button class="gallery-item reveal" type="button" data-full="https://placehold.jp/ead6c8/3a2e28/900x900.png?text=Nail%2001" data-caption="ワンカラー×パールネイル">
-        <img src="https://placehold.jp/ead6c8/3a2e28/500x500.png?text=Nail%2001" alt="サロンワーク例3(ダミー)" loading="lazy">
+      <button class="gallery-item reveal" type="button" data-full="images/gallery-nail-pearl.jpg" data-caption="ワンカラー×パールネイル">
+        <img src="images/gallery-nail-pearl.jpg" alt="ワンカラー×パールネイル" loading="lazy">
         <span class="gallery-overlay">♡ 156</span>
       </button>
-      <button class="gallery-item reveal" type="button" data-full="https://placehold.jp/dfcab9/3a2e28/900x900.png?text=Look%2003" data-caption="ゆるふわパーマスタイル">
-        <img src="https://placehold.jp/dfcab9/3a2e28/500x500.png?text=Look%2003" alt="サロンワーク例4(ダミー)" loading="lazy">
+      <button class="gallery-item reveal" type="button" data-full="images/gallery-perm-style.jpg" data-caption="ゆるふわパーマスタイル">
+        <img src="images/gallery-perm-style.jpg" alt="ゆるふわパーマスタイル" loading="lazy">
         <span class="gallery-overlay">♡ 71</span>
       </button>
-      <button class="gallery-item reveal" type="button" data-full="https://placehold.jp/e6d2c3/3a2e28/900x900.png?text=Nail%2002" data-caption="フラワーアート×ミラーネイル">
-        <img src="https://placehold.jp/e6d2c3/3a2e28/500x500.png?text=Nail%2002" alt="サロンワーク例5(ダミー)" loading="lazy">
+      <button class="gallery-item reveal" type="button" data-full="images/gallery-nail-flower.jpg" data-caption="フラワーアート×ミラーネイル">
+        <img src="images/gallery-nail-flower.jpg" alt="フラワーアート×ミラーネイル" loading="lazy">
         <span class="gallery-overlay">♡ 203</span>
       </button>
-      <button class="gallery-item reveal" type="button" data-full="https://placehold.jp/e0cabb/3a2e28/900x900.png?text=Look%2004" data-caption="艶感ストレートロング">
-        <img src="https://placehold.jp/e0cabb/3a2e28/500x500.png?text=Look%2004" alt="サロンワーク例6(ダミー)" loading="lazy">
+      <button class="gallery-item reveal" type="button" data-full="images/gallery-straight-long.jpg" data-caption="艶感ストレートロング">
+        <img src="images/gallery-straight-long.jpg" alt="艶感ストレートロング" loading="lazy">
         <span class="gallery-overlay">♡ 88</span>
       </button>
     </div>
@@ -335,23 +283,6 @@
 <button class="to-top" id="toTop" aria-label="ページトップへ戻る">
   <span aria-hidden="true">↑</span>
 </button>
-
-<!-- ==================== STAFF MODAL ==================== -->
-<div class="modal" id="staffModal" role="dialog" aria-modal="true" aria-labelledby="staffModalName" hidden>
-  <div class="modal-overlay" data-close="staff"></div>
-  <div class="modal-box modal-staff">
-    <button class="modal-close" type="button" data-close="staff" aria-label="閉じる">×</button>
-    <div class="modal-staff-photo">
-      <img id="staffModalImg" src="" alt="">
-    </div>
-    <div class="modal-staff-body">
-      <span class="staff-role" id="staffModalRole"></span>
-      <h3 id="staffModalName"></h3>
-      <p id="staffModalBio"></p>
-      <ul class="modal-staff-tags" id="staffModalTags"></ul>
-    </div>
-  </div>
-</div>
 
 <!-- ==================== GALLERY LIGHTBOX ==================== -->
 <div class="modal" id="galleryModal" role="dialog" aria-modal="true" aria-labelledby="galleryModalCaption" hidden>

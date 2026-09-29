@@ -54,7 +54,6 @@
 
   /* ==================== Generic modal helpers ==================== */
   const modals = {
-    staff: document.getElementById("staffModal"),
     gallery: document.getElementById("galleryModal"),
     confirm: document.getElementById("confirmModal"),
   };
@@ -79,58 +78,6 @@
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     Object.keys(modals).forEach((key) => { if (!modals[key].hidden) closeModal(key); });
-  });
-
-  /* ==================== Staff modal ==================== */
-  const staffData = {
-    rina: {
-      role: "Director / Stylist",
-      name: "早坂 凛 Rin Hayasaka",
-      img: "https://placehold.jp/e3c9bb/3a2e28/700x800.png?text=Rina",
-      bio: "美容師歴15年。骨格・髪質を活かしたナチュラルなスタイル提案を得意とします。丁寧なカウンセリングで、なりたいイメージを一緒に見つけていきます。",
-      tags: ["似合わせカット", "縮毛矯正", "ブライダル"],
-    },
-    yuki: {
-      role: "Stylist",
-      name: "三浦 結希 Yuki Miura",
-      img: "https://placehold.jp/d9c4b8/3a2e28/700x800.png?text=Yuki",
-      bio: "トレンドを取り入れつつ、扱いやすさを重視したデザインが得意。カラーバリエーションの提案力に定評があります。",
-      tags: ["デザインカラー", "パーマ", "メンズ対応"],
-    },
-    sara: {
-      role: "Nail Artist",
-      name: "藤井 紗良 Sara Fujii",
-      img: "https://placehold.jp/ead6c8/3a2e28/700x800.png?text=Sara",
-      bio: "ジェルネイル・アート歴8年。シンプルから華やかなデザインまで、指先を上品に彩ります。持ちの良さにもこだわった丁寧な施術が好評です。",
-      tags: ["ジェルアート", "フットケア", "パラジェル"],
-    },
-    mei: {
-      role: "Junior Stylist",
-      name: "中村 芽依 Mei Nakamura",
-      img: "https://placehold.jp/dfcab9/3a2e28/700x800.png?text=Mei",
-      bio: "丁寧なシャンプー・ヘッドスパが得意なジュニアスタイリスト。リラックスできる時間をご提供します。",
-      tags: ["ヘッドスパ", "トリートメント", "キッズ対応"],
-    },
-  };
-
-  document.querySelectorAll("[data-staff]").forEach((card) => {
-    card.addEventListener("click", () => {
-      const data = staffData[card.dataset.staff];
-      if (!data) return;
-      document.getElementById("staffModalImg").src = data.img;
-      document.getElementById("staffModalImg").alt = data.name + "(ダミー写真)";
-      document.getElementById("staffModalRole").textContent = data.role;
-      document.getElementById("staffModalName").textContent = data.name;
-      document.getElementById("staffModalBio").textContent = data.bio;
-      const tagsEl = document.getElementById("staffModalTags");
-      tagsEl.innerHTML = "";
-      data.tags.forEach((tag) => {
-        const li = document.createElement("li");
-        li.textContent = tag;
-        tagsEl.appendChild(li);
-      });
-      openModal("staff");
-    });
   });
 
   /* ==================== Menu tabs ==================== */
