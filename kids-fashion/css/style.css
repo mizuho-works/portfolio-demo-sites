@@ -13,8 +13,13 @@
   --color-accent-dark: #a66f34;
   --color-sage: #8fa285;
   --color-sage-dark: #6d8264;
+  --color-sage-soft: #e7ede3;
   --color-blue: #9fb8c4;
+  --color-blue-dark: #5f7f8c;
+  --color-blue-soft: #e5edf0;
   --color-pink: #e3a9a0;
+  --color-pink-dark: #b96f64;
+  --color-pink-soft: #f7e9e5;
   --color-danger: #c1594b;
   --header-h: 78px;
   --header-h-mobile: 62px;
@@ -382,7 +387,20 @@ main > section { padding: 96px 6vw; }
 }
 .craft-list { display: flex; flex-direction: column; gap: 30px; margin-top: 30px; }
 .craft-list li { display: flex; gap: 18px; }
-.craft-icon { font-size: 30px; flex-shrink: 0; }
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.icon-badge svg { width: 46%; height: 46%; }
+.icon-badge.is-sage { background: var(--color-sage-soft); color: var(--color-sage-dark); }
+.icon-badge.is-blue { background: var(--color-blue-soft); color: var(--color-blue-dark); }
+.icon-badge.is-pink { background: var(--color-pink-soft); color: var(--color-pink-dark); }
+.icon-badge.is-accent { background: var(--color-bg-soft); color: var(--color-accent-dark); }
+
+.craft-icon { width: 56px; height: 56px; flex-shrink: 0; }
 .craft-list h3 { font-size: 16px; margin-bottom: 6px; }
 .craft-list p { margin: 0; color: var(--color-text-soft); font-size: 14px; }
 .craft-media { aspect-ratio: 4/5; overflow: hidden; border-radius: 18px; }
@@ -420,7 +438,7 @@ main > section { padding: 96px 6vw; }
   padding-top: 72px;
   padding-bottom: 72px;
 }
-.info-icon { font-size: 30px; display: block; margin-bottom: 14px; }
+.info-icon { width: 52px; height: 52px; margin: 0 auto 16px; }
 .info-item h3 { font-size: 15px; margin-bottom: 8px; }
 .info-item p { margin: 0; font-size: 13px; color: var(--color-text-soft); }
 
