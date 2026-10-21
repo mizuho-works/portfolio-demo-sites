@@ -87,36 +87,14 @@ $('#drinkList').innerHTML = DR.map(([n, p, o, i]) => `
       <div class="opts">${o.map(x => `<span class="opt">${x}</span>`).join('')}</div></div>
     <div class="dr-price">${yen(p)}<small> 税込</small></div></li>`).join('');
 
-/* ---------------- concept: split text ---------------- */
-const ct = $('#conceptText');
-(function split(node) {
-  [...node.childNodes].forEach(n => {
-    if (n.nodeType === 3) { const f = document.createDocumentFragment(); [...n.textContent].forEach(ch => { const s = document.createElement('span'); s.className = 'w'; s.textContent = ch; f.appendChild(s); }); n.replaceWith(f); }
-    else if (n.nodeType === 1) split(n);
-  });
-})(ct);
-const chars = $$('.w', ct);
-
-/* ---------------- features ---------------- */
-const feats = $$('.feat'), bigImg = $('#bigImg'), bigRing = $('#bigRing'), stageLabel = $('#stageLabel');
-let activeFeat = -1;
-function setFeat(i) {
-  if (i === activeFeat) return; activeFeat = i;
-  feats.forEach((f, j) => f.classList.toggle('active', j === i));
-  const f = feats[i]; bigImg.style.opacity = 0;
-  setTimeout(() => { bigImg.src = f.dataset.img; bigImg.style.opacity = 1; }, 220);
-  bigRing.style.setProperty('--ringc', f.dataset.color); stageLabel.textContent = f.dataset.label;
-}
-
 /* ---------------- reveal ---------------- */
 $$('.sec-title,.lead,.gcard,.info div,.map,.eyebrow').forEach(el => el.classList.add('reveal'));
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12, rootMargin: '0px 0px -6% 0px' });
 $$('.reveal').forEach(el => io.observe(el));
 
 /* ---------------- scroll ---------------- */
-const hero = $('#hero'), heroTitle = $('.hero-title'), floats = $$('.float'), blobs = $$('.blob'), spinImg = $('.spin img');
-const concept = $('.concept'), features = $('.features'), menuMarq = $('#menuMarq'), menuSec = $('#menu'), route = $('#route'), bar = $('.progress i');
-const parx = $$('[data-speed]');
+const heroTitle = $('.hero-title'), floats = $$('.float'), blobs = $$('.blob');
+const menuMarq = $('#menuMarq'), menuSec = $('#menu'), route = $('#route'), bar = $('.progress i');
 let mx = 0, my = 0, tx = 0, ty = 0, ticking = false;
 if (fine && !reduce) addEventListener('pointermove', e => { tx = e.clientX / innerWidth - .5; ty = e.clientY / innerHeight - .5; }, { passive: true });
 function frame() {
@@ -129,19 +107,8 @@ function frame() {
     heroTitle.style.opacity = clamp(1 - y / (vh * .9));
     floats.forEach(f => { const d = +f.dataset.depth; f.style.transform = `translate3d(${mx * d * 50}px,${my * d * 36 - y * .22 * d}px,0)`; });
     blobs.forEach(b => { const d = +b.dataset.depth; b.style.transform = `translate3d(${-mx * d * 60}px,${-my * d * 40 + y * .2 * d}px,0)`; });
-    spinImg.style.transform = `scale(1.04) rotate(${y * .35}deg)`;
   }
-  let r = concept.getBoundingClientRect(), p = clamp(-r.top / (r.height - vh));
-  const n = Math.round(p * 1.1 * chars.length); chars.forEach((c, i) => c.classList.toggle('on', i < n));
-  parx.forEach(el => { const rr = el.getBoundingClientRect(); el.style.transform = `translateY(${(rr.top - vh / 2) * +el.dataset.speed}px)`; });
-  r = features.getBoundingClientRect();
-  if (r.top < vh && r.bottom > 0) {
-    const fp = clamp(-r.top / (r.height - vh));
-    bigImg.style.setProperty('--rot', fp * 540 + 'deg');
-    let best = 0, bd = 1e9; feats.forEach((f, i) => { const fr = f.getBoundingClientRect(), d = Math.abs(fr.top + fr.height / 2 - vh * (innerWidth < 800 ? .72 : .5)); if (d < bd) { bd = d; best = i; } });
-    setFeat(best);
-  }
-  r = menuSec.getBoundingClientRect();
+  const r = menuSec.getBoundingClientRect();
   if (r.top < vh && r.bottom > 0) menuMarq.style.transform = `translateX(${-(vh - r.top) * .45}px)`;
   route.style.setProperty('--dash', -y * .25);
   ticking = false;
@@ -149,5 +116,5 @@ function frame() {
 const req = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
 addEventListener('scroll', req, { passive: true }); addEventListener('resize', req);
 if (fine && !reduce) { (function loop() { if (scrollY < innerHeight * 1.3) frame(); requestAnimationFrame(loop); })(); }
-frame(); setFeat(0);
+frame();
 })();

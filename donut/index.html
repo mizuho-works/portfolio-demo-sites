@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 <script>document.documentElement.classList.add("js")</script>
@@ -43,7 +43,7 @@
   <p class="hero-top">FRESH DONUTS SHOP</p>
 
   <h1 class="hero-title" aria-label="mogu">
-    <span class="ltr l1"><svg class="ttl" viewBox="0 0 915 1280" style="--r:0.715" aria-hidden="true"><use href="images/title.svg#l-m"/></svg></span><span class="ltr l2 ring"><span class="sticker spin"><img src="images/d01.png" alt=""></span></span><span class="ltr l3"><svg class="ttl" viewBox="0 0 653 1280" style="--r:0.51" aria-hidden="true"><use href="images/title.svg#l-g"/></svg></span><span class="ltr l4"><svg class="ttl" viewBox="0 0 686 1280" style="--r:0.536" aria-hidden="true"><use href="images/title.svg#l-u"/></svg></span>
+    <span class="ltr l1"><svg class="ttl" viewBox="0 0 915 1280" style="--r:0.715" aria-hidden="true"><use href="images/title.svg#l-m"/></svg></span><span class="ltr l2 ring"><span class="sticker"><img src="images/d01.png" alt=""></span></span><span class="ltr l3"><svg class="ttl" viewBox="0 0 653 1280" style="--r:0.51" aria-hidden="true"><use href="images/title.svg#l-g"/></svg></span><span class="ltr l4"><svg class="ttl" viewBox="0 0 686 1280" style="--r:0.536" aria-hidden="true"><use href="images/title.svg#l-u"/></svg></span>
     <svg class="smile" viewBox="0 0 80 40" aria-hidden="true"><path d="M6 8c10 28 58 28 68 0" /></svg>
   </h1>
 
@@ -76,41 +76,44 @@
 
 <!-- ============ CONCEPT ============ -->
 <section class="concept" id="concept">
-  <div class="concept-pin">
+  <div class="wrap concept-inner">
     <p class="eyebrow">CONCEPT</p>
-    <p class="concept-text" id="conceptText">ふわっと、<em>とろける。</em>しあわせを、<em>ひとくち</em>で。 揚げたてのやわらかな生地に、なめらかなクリームと厳選素材を合わせた、生ドーナツ専門店です。</p>
+    <p class="concept-text"><span>ふわっと、</span><em>とろける。</em><span>しあわせを、</span><span><em>ひとくち</em>で。</span></p>
+    <p class="concept-sub">揚げたてのやわらかな生地に、なめらかなクリームと厳選素材を合わせた、生ドーナツ専門店です。</p>
     <div class="concept-pics" aria-hidden="true">
-      <span class="sticker cp1" data-speed="-0.12"><img src="images/d07.png" alt=""></span>
-      <span class="sticker cp2" data-speed="0.1"><img src="images/d15.png" alt=""></span>
-      <span class="sticker cp3" data-speed="-0.2"><img src="images/d05.png" alt=""></span>
+      <span class="sticker"><img src="images/d07.png" alt=""></span>
+      <span class="sticker"><img src="images/d15.png" alt=""></span>
+      <span class="sticker"><img src="images/d05.png" alt=""></span>
     </div>
   </div>
 </section>
 
 <!-- ============ FEATURES (sticky + scroll-linked) ============ -->
 <section class="features" id="kodawari">
-  <div class="features-stage">
-    <div class="stage-sticky">
-      <p class="eyebrow">KODAWARI</p>
-      <div class="big-donut">
-        <span class="big-ring" id="bigRing"></span>
-        <img id="bigImg" src="images/d01.png" alt="">
-        <span class="stage-label" id="stageLabel">生地</span>
-      </div>
-    </div>
-    <div class="features-list">
-      <article class="feat" data-img="images/d01.png" data-label="生地" data-color="#FFD84D">
+  <div class="wrap">
+    <p class="eyebrow">KODAWARI</p>
+    <div class="feat-list">
+    <article class="feat reveal">
+      <div class="feat-pic" style="--rc:#FFD84D"><span class="sticker"><img src="images/d01.png" alt="プレーンドーナツ" loading="lazy"></span></div>
+      <div class="feat-body">
         <h2><svg class="ttl" viewBox="0 0 6008 2560" style="--r:2.347" role="img" aria-label="空気をまとう、ふわとろ生地。"><use href="images/title.svg#f1"/></svg></h2>
         <p>北海道産小麦と米粉をブレンドし、低温でじっくり発酵。揚げたてをすぐにお届けするため、店内の厨房で毎朝仕込んでいます。口に入れた瞬間、ふわっとほどける軽さが自慢です。</p>
-      </article>
-      <article class="feat" data-img="images/d03.png" data-label="クリーム" data-color="#F7A9C0">
+      </div>
+    </article>
+    <article class="feat reveal">
+      <div class="feat-pic" style="--rc:#F7A9C0"><span class="sticker"><img src="images/d03.png" alt="いちごミルクドーナツ" loading="lazy"></span></div>
+      <div class="feat-body">
         <h2><svg class="ttl" viewBox="0 0 6618 2560" style="--r:2.585" role="img" aria-label="なめらか、とろけるクリーム。"><use href="images/title.svg#f2"/></svg></h2>
         <p>生クリームとミルクを合わせた、やさしい甘さの特製クリーム。ドーナツの味に合わせて、いちごや抹茶、カスタードなどを使い分けています。甘さはあくまで控えめに。</p>
-      </article>
-      <article class="feat" data-img="images/d08.png" data-label="素材" data-color="#B79C79">
+      </div>
+    </article>
+    <article class="feat reveal">
+      <div class="feat-pic" style="--rc:#D9C3A0"><span class="sticker"><img src="images/d08.png" alt="クレームブリュレドーナツ" loading="lazy"></span></div>
+      <div class="feat-body">
         <h2><svg class="ttl" viewBox="0 0 5841 2560" style="--r:2.282" role="img" aria-label="素材の香りを、そのまま。"><use href="images/title.svg#f3"/></svg></h2>
         <p>宇治抹茶、季節のフルーツ、ナッツやチョコレートまで素材は産地にこだわって選定。春は桜、夏はマンゴー、秋は栗と巨峰と、季節ごとの限定ドーナツでおいしさをお届けします。</p>
-      </article>
+      </div>
+    </article>
     </div>
   </div>
 </section>
@@ -226,6 +229,6 @@
   <small>© 2026 mogu FRESH DONUTS（架空店舗）. All rights reserved.</small>
 </footer>
 
-<script src="js/main.js"></script>
+<script src="js/main.js?v=4"></script>
 </body>
 </html>
