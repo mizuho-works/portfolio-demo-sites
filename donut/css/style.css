@@ -239,3 +239,21 @@ ul{list-style:none}
   .reveal{opacity:1;transform:none}
   .concept-text .w{color:var(--ink)}
 }
+
+/* ===== display lettering (outlined, see tools/make-title-sprite.py) ===== */
+.ttl{display:block;fill:currentColor;stroke:currentColor;width:calc(var(--r) * var(--h));max-width:100%;height:auto;aspect-ratio:var(--r)}
+.logo .ttl{--h:36px}
+.hero-title{font-size:clamp(110px,25vw,320px)}
+.hero-title .ltr .ttl{--h:1.4em;max-width:none}
+.hero-title .ltr{display:block;line-height:0}
+.hero-title .ltr.ring{width:.62em}
+.hero-copy{margin-bottom:26px}
+.hero-copy .ttl{--h:clamp(72px,13vw,104px);margin:0 auto}
+.sec-title .ttl{--h:clamp(44px,7.5vw,68px)}
+.feat h2 .ttl{--h:clamp(84px,11vw,112px)}
+.footer-logo{display:flex;justify-content:center;color:var(--pink)}
+.footer-logo .ttl{--h:clamp(150px,36vw,380px)}
+.footer-copy .ttl{--h:clamp(34px,5vw,44px);margin:0 auto}
+@media(max-width:700px){.hero-title{font-size:25vw}}
+.hero-title .ltr.ring{width:.74em}
+.smile{bottom:.1em;right:.02em}
