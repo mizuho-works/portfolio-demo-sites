@@ -8,10 +8,11 @@
 <meta name="theme-color" content="#FBF6EA">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Caveat+Brush&family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<script>document.documentElement.classList.add("js")</script>
 <div class="progress" aria-hidden="true"><i></i></div>
 
 <!-- ============ HEADER ============ -->
@@ -51,19 +52,17 @@
 
   <div class="hero-cta">
     <a class="btn btn-pink" href="#menu">メニューを見る</a>
-    <a class="btn btn-ghost" href="#play">もぐもぐ遊ぶ</a>
+    <a class="btn btn-ghost" href="#access">店舗情報</a>
   </div>
+ 
+  <!-- floating donuts -->
+  <div class="float f1" data-depth="0.9"><span class="sticker"><img src="images/d03.png" alt="いちごミルク"></span></div>
+  <div class="float f2" data-depth="1.4"><span class="sticker"><img src="images/d04.png" alt="抹茶"></span></div>
+  <div class="float f3" data-depth="0.6"><span class="sticker"><img src="images/d02.png" alt="チョコレート"></span></div>
+  <div class="float f4" data-depth="1.1"><span class="sticker"><img src="images/d18.png" alt="いちごショート"></span></div>
+  <div class="float f5" data-depth="0.75"><span class="sticker"><img src="images/d09.png" alt="バナナチョコ"></span></div>
+  <div class="float f6" data-depth="1.3"><span class="sticker"><img src="images/d12.png" alt="ラズベリーピスタチオ"></span></div>
 
-  <!-- 触れるドーナツ -->
-  <div class="float f1" data-depth="0.9"><button class="bitable sticker" aria-label="ドーナツをかじる"><img src="images/d03.png" alt="いちごミルク"></button></div>
-  <div class="float f2" data-depth="1.4"><button class="bitable sticker" aria-label="ドーナツをかじる"><img src="images/d04.png" alt="抹茶"></button></div>
-  <div class="float f3" data-depth="0.6"><button class="bitable sticker" aria-label="ドーナツをかじる"><img src="images/d02.png" alt="チョコレート"></button></div>
-  <div class="float f4" data-depth="1.1"><button class="bitable sticker" aria-label="ドーナツをかじる"><img src="images/d18.png" alt="いちごショート"></button></div>
-  <div class="float f5" data-depth="0.75"><button class="bitable sticker" aria-label="ドーナツをかじる"><img src="images/d09.png" alt="バナナチョコ"></button></div>
-  <div class="float f6" data-depth="1.3"><button class="bitable sticker" aria-label="ドーナツをかじる"><img src="images/d12.png" alt="ラズベリーピスタチオ"></button></div>
-
-  <div class="bite-counter" aria-live="polite"><b id="biteCount">0</b><span>もぐ</span></div>
-  <p class="hero-hint">ドーナツをタップして、かじってみて</p>
   <div class="scroll-cue" aria-hidden="true"><span>SCROLL</span><i></i></div>
 </section>
 
@@ -96,41 +95,22 @@
       <div class="big-donut">
         <span class="big-ring" id="bigRing"></span>
         <img id="bigImg" src="images/d01.png" alt="">
-        <span class="stage-label" id="stageLabel">01 生地</span>
+        <span class="stage-label" id="stageLabel">生地</span>
       </div>
     </div>
     <div class="features-list">
-      <article class="feat" data-img="images/d01.png" data-label="01 生地" data-color="#FFD84D">
-        <span class="num">01</span>
+      <article class="feat" data-img="images/d01.png" data-label="生地" data-color="#FFD84D">
         <h2>空気をまとう、<br>ふわとろ生地。</h2>
         <p>北海道産小麦と米粉をブレンドし、低温でじっくり発酵。揚げたてをすぐにお届けするため、店内の厨房で毎朝仕込んでいます。口に入れた瞬間、ふわっとほどける軽さが自慢です。</p>
       </article>
-      <article class="feat" data-img="images/d03.png" data-label="02 クリーム" data-color="#F7A9C0">
-        <span class="num">02</span>
+      <article class="feat" data-img="images/d03.png" data-label="クリーム" data-color="#F7A9C0">
         <h2>なめらか、<br>とろけるクリーム。</h2>
         <p>生クリームとミルクを合わせた、やさしい甘さの特製クリーム。ドーナツの味に合わせて、いちごや抹茶、カスタードなどを使い分けています。甘さはあくまで控えめに。</p>
       </article>
-      <article class="feat" data-img="images/d08.png" data-label="03 素材" data-color="#B79C79">
-        <span class="num">03</span>
+      <article class="feat" data-img="images/d08.png" data-label="素材" data-color="#B79C79">
         <h2>素材の香りを、<br>そのまま。</h2>
         <p>宇治抹茶、季節のフルーツ、ナッツやチョコレートまで素材は産地にこだわって選定。春は桜、夏はマンゴー、秋は栗と巨峰と、季節ごとの限定ドーナツでおいしさをお届けします。</p>
       </article>
-    </div>
-  </div>
-</section>
-
-<!-- ============ PLAY: GACHA ============ -->
-<section class="play" id="play">
-  <div class="play-inner">
-    <p class="eyebrow">PLAY</p>
-    <h2 class="sec-title">きょうの一個、<br>mogu に選ばせて。</h2>
-    <p class="lead">迷ったらくるくる。ルーレットで出会いの一個を決めよう。</p>
-    <button class="gacha-btn" id="gachaBtn"><span>くるくる ひく</span></button>
-    <div class="play-ring" aria-hidden="true">
-      <span class="sticker pr1"><img src="images/d10.png" alt=""></span>
-      <span class="sticker pr2"><img src="images/d14.png" alt=""></span>
-      <span class="sticker pr3"><img src="images/d17.png" alt=""></span>
-      <span class="sticker pr4"><img src="images/d06.png" alt=""></span>
     </div>
   </div>
 </section>
@@ -141,7 +121,7 @@
   <div class="wrap">
     <p class="eyebrow">MENU</p>
     <h2 class="sec-title">全20種の、しあわせ。</h2>
-    <p class="lead">価格はすべて税込。気になる子は「＋」で My Box へ。</p>
+    <p class="lead">価格はすべて税込です。</p>
 
     <div class="filters" role="group" aria-label="絞り込み">
       <div class="chips" id="catChips">
@@ -149,14 +129,6 @@
         <button class="chip" data-cat="std">定番</button>
         <button class="chip" data-cat="ltd">期間限定</button>
         <button class="chip" data-cat="now">いま買える</button>
-      </div>
-      <div class="chips mood" id="moodChips">
-        <span class="mood-label">きぶん</span>
-        <button class="chip" data-tag="sweet">あま〜い</button>
-        <button class="chip" data-tag="sour">甘酸っぱい</button>
-        <button class="chip" data-tag="bitter">ほろ苦</button>
-        <button class="chip" data-tag="fresh">さっぱり</button>
-        <button class="chip" data-tag="rich">ごほうび</button>
       </div>
     </div>
     <p class="season-now" id="seasonNow"></p>
@@ -187,7 +159,7 @@
     <div class="gift-cards">
       <article class="gcard gc1"><h3>テイクアウト</h3><p>全商品テイクアウトOK。揚げたてのふわふわを、持ち帰り専用のふんわりボックスに。イートインは店内8席です。</p><span class="tag">OK</span></article>
       <article class="gcard gc2"><h3>ギフトボックス</h3><p>4個入り・6個入りの詰め合わせをご用意。好きな組み合わせで選べます。メッセージカードも無料でおつけします。</p><span class="tag">4個 / 6個</span></article>
-      <article class="gcard gc3"><h3>お取り置き</h3><p>ご来店前のお取り置きも承ります。My Box のリストを画面でお見せいただくか、お電話にてお伝えください。</p><span class="tag">前日まで</span></article>
+      <article class="gcard gc3"><h3>お取り置き</h3><p>ご来店前のお取り置きも承ります。ご希望の商品と個数、お受け取り時間をお電話でお伝えください。</p><span class="tag">前日まで</span></article>
     </div>
   </div>
 </section>
@@ -254,46 +226,6 @@
   <small>© 2026 mogu FRESH DONUTS（架空店舗）. All rights reserved.</small>
 </footer>
 
-<!-- ============ MY BOX ============ -->
-<button class="box-fab" id="boxFab" aria-controls="boxPanel" aria-expanded="false">
-  <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 18l18-8 18 8v22H6z" fill="#fff"/><path d="M6 18l18 8 18-8M24 26v14" stroke="#F0608C" stroke-width="3" fill="none"/></svg>
-  <span class="fab-label">My Box</span><b id="fabCount">0</b><span class="fab-total" id="fabTotal">¥0</span>
-</button>
-<aside class="box-panel" id="boxPanel" aria-hidden="true" aria-label="My Box">
-  <div class="panel-head"><h2>My Box</h2><button class="close" id="boxClose" aria-label="閉じる">×</button></div>
-  <div class="slots" id="slots" aria-hidden="true"></div>
-  <ul class="cart" id="cartList"></ul>
-  <p class="cart-empty" id="cartEmpty">まだ空っぽ。メニューの「＋」で入れてみてね。</p>
-  <dl class="sum">
-    <div><dt>小計</dt><dd id="sumSub">¥0</dd></div>
-    <div class="disc"><dt>セット割引 <small id="sumSets"></small></dt><dd id="sumDisc">−¥0</dd></div>
-    <div class="total"><dt>合計（税込）</dt><dd id="sumTotal">¥0</dd></div>
-  </dl>
-  <div class="panel-actions">
-    <button class="btn btn-pink" id="copyBtn">リストをコピー</button>
-    <button class="btn btn-ghost" id="clearBtn">からにする</button>
-  </div>
-  <p class="note">※ このリストは来店前のお楽しみ用で、注文は確定されません。ご注文は店頭でどうぞ。</p>
-</aside>
-<div class="scrim" id="scrim"></div>
-
-<!-- ============ GACHA MODAL ============ -->
-<div class="modal" id="gachaModal" role="dialog" aria-modal="true" aria-labelledby="gachaName" hidden>
-  <div class="modal-card">
-    <button class="close" id="gachaClose" aria-label="閉じる">×</button>
-    <p class="modal-top" id="gachaTop">くるくる…</p>
-    <div class="sticker gacha-pic"><img id="gachaImg" src="images/d01.png" alt=""></div>
-    <h3 id="gachaName">…</h3>
-    <p id="gachaDesc" class="gacha-desc"></p>
-    <p id="gachaPrice" class="gacha-price"></p>
-    <div class="modal-actions">
-      <button class="btn btn-pink" id="gachaAdd" disabled>My Box に入れる</button>
-      <button class="btn btn-ghost" id="gachaAgain" disabled>もう一回</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="js/main.js"></script>
 </body>
 </html>
