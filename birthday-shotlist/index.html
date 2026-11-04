@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>佳純 1st Birthday 撮影進行表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf7f2; --card:#fff; --ink:#3d3530; --sub:#7a6f66; --line:#e9e1d6;
+  --accent:#c98d6b; --accent-soft:#f6e9df; --tulle:#f3e3e3; --tulle-ink:#a7656a;
+  --hw:#e8772e; --hw-dark:#2a2320; --hw-soft:#fbeadc; --ok:#6f9a7a;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic",system-ui,sans-serif;line-height:1.75;font-size:15px}
+img{max-width:100%;display:block}
+.wrap{max-width:880px;margin:0 auto;padding:0 16px}
+header.hero{padding:48px 0 28px;text-align:center}
+.hero .eyebrow{letter-spacing:.2em;color:var(--accent);font-size:12px;font-weight:700}
+.hero h1{font-size:clamp(26px,6vw,38px);margin:6px 0 4px;font-weight:700}
+.hero p{margin:0;color:var(--sub)}
+.meta{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:16px}
+.meta span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px}
+
+/* sticky progress */
+.progress{position:sticky;top:0;z-index:10;background:rgba(250,247,242,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.progress .wrap{display:flex;align-items:center;gap:12px;padding-top:8px;padding-bottom:8px}
+.progress nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+.progress nav a{white-space:nowrap;text-decoration:none;color:var(--ink);font-size:13px;padding:3px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
+.progress .count{font-size:13px;font-weight:700;white-space:nowrap;color:var(--accent)}
+
+section{margin:36px 0}
+h2{font-size:21px;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+h2 .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-size:15px;flex:none}
+.lead{color:var(--sub);margin:0 0 16px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+.box h3{margin:0 0 8px;font-size:16px}
+ul.tight{margin:0;padding-left:1.2em}
+ul.tight li{margin:2px 0}
+ul[data-prep]{list-style:none;padding-left:0}
+ul[data-prep] input{width:18px;height:18px;vertical-align:-3px;margin-right:6px;accent-color:var(--ok)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+
+/* timeline */
+.timeline{display:grid;gap:0;border-left:3px solid var(--line);margin-left:8px;padding-left:18px}
+.tl{position:relative;padding:6px 0 12px}
+.tl::before{content:"";position:absolute;left:-26px;top:12px;width:13px;height:13px;border-radius:50%;background:var(--accent);border:3px solid var(--bg)}
+.tl.break::before{background:var(--sub)}
+.tl.hw::before{background:var(--hw)}
+.tl .time{font-weight:700;font-size:13px;color:var(--accent)}
+.tl.hw .time{color:var(--hw)}
+.tl .what{font-weight:700}
+.tl .note{color:var(--sub);font-size:13px}
+
+/* scene */
+.scene-head{border-radius:16px;padding:16px 20px;margin-bottom:14px;background:var(--accent-soft)}
+.scene-head.tulle{background:var(--tulle)}
+.scene-head.hw{background:var(--hw-dark);color:#fff}
+.scene-head h2{margin:0}
+.scene-head .outfit{font-size:13px;margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
+.scene-head .outfit span{background:rgba(255,255,255,.7);border-radius:999px;padding:2px 10px}
+.scene-head.hw .outfit span{background:rgba(255,255,255,.14)}
+.scene-head .goal{margin:6px 0 0;font-size:14px}
+
+.shot{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:12px;display:grid;grid-template-columns:200px 1fr;overflow:hidden}
+.shot.done{border-color:var(--ok);background:#f5faf6}
+.shot .pic{background:#f1ece5;position:relative;min-height:160px}
+.shot .pic img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.shot .pic svg{width:100%;height:100%;position:absolute;inset:0}
+.shot .pic .cap{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.55);color:#fff;font-size:11px;padding:1px 7px;border-radius:999px}
+.shot .body{padding:14px 16px}
+.shot .top{display:flex;align-items:flex-start;gap:10px}
+.shot .id{font-weight:700;color:var(--accent);font-size:13px;flex:none;padding-top:2px}
+.shot h3{margin:0;font-size:16px;flex:1}
+.shot .tag{font-size:11px;border-radius:999px;padding:1px 8px;background:var(--accent-soft);color:var(--accent);font-weight:700;white-space:nowrap}
+.shot .tag.new{background:#e6efe8;color:var(--ok)}
+.shot .tag.must{background:#fde8e0;color:#b4532a}
+.shot ul{margin:8px 0 0;padding-left:1.1em;font-size:14px}
+.shot li{margin:2px 0}
+.shot li b{color:var(--ink)}
+.shot .role{margin-top:8px;font-size:13px;color:var(--sub);background:var(--bg);border-radius:10px;padding:6px 10px}
+.check{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;cursor:pointer;user-select:none;width:max-content}
+.check input{width:20px;height:20px;accent-color:var(--ok)}
+.hwscene .shot .id{color:var(--hw)}
+.hwscene .shot .tag{background:var(--hw-soft);color:#b4531a}
+
+.interlude{border:2px dashed var(--line);border-radius:16px;padding:14px 18px;margin:20px 0;background:#fffdf9}
+.interlude b{color:var(--accent)}
+.interlude.hw{border-color:#f0c7a6}
+
+/* composition ideas */
+.ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.idea{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.idea .art{aspect-ratio:4/3;background:#f1ece5;position:relative}
+.idea .art img,.idea .art svg{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.idea .txt{padding:10px 14px 14px}
+.idea h3{margin:0 0 4px;font-size:15px}
+.idea p{margin:0;font-size:13px;color:var(--sub)}
+
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--sub);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+
+footer{padding:32px 0 56px;text-align:center;color:var(--sub);font-size:12px}
+.reset{background:none;border:1px solid var(--line);border-radius:999px;padding:4px 14px;color:var(--sub);font:inherit;font-size:12px;cursor:pointer;margin-top:8px}
+
+@media (max-width:600px){
+  .shot{grid-template-columns:1fr}
+  .shot .pic{min-height:0;aspect-ratio:4/3}
+}
+@media print{
+  .progress,.reset{display:none}
+  .shot,.idea{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<!-- 構図イラスト用の人型パーツ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mama" viewBox="0 0 40 90"><circle cx="20" cy="14" r="10" fill="#5a4a42"/><path d="M8 30 Q20 24 32 30 L36 88 H4 Z" fill="#e9dccb"/></symbol>
+    <symbol id="papa" viewBox="0 0 40 90"><circle cx="20" cy="13" r="10" fill="#3b302b"/><rect x="7" y="25" width="26" height="36" rx="8" fill="#ffffff" stroke="#d8cdbf"/><rect x="9" y="58" width="22" height="30" rx="5" fill="#6d5546"/></symbol>
+    <symbol id="ane" viewBox="0 0 30 60"><circle cx="15" cy="11" r="8.5" fill="#4a3c35"/><path d="M6 22 Q15 18 24 22 L28 56 H2 Z" fill="#fff" stroke="#e1d6c8"/></symbol>
+    <symbol id="baby" viewBox="0 0 26 40"><circle cx="13" cy="10" r="8" fill="#4a3c35"/><ellipse cx="13" cy="28" rx="10" ry="11" fill="#fff" stroke="#e1d6c8"/></symbol>
+    <symbol id="ane-hw" viewBox="0 0 30 60"><circle cx="15" cy="11" r="8.5" fill="#4a3c35"/><path d="M6 22 Q15 18 24 22 L28 56 H2 Z" fill="#2a2320"/></symbol>
+    <symbol id="baby-hw" viewBox="0 0 26 40"><circle cx="13" cy="10" r="8" fill="#4a3c35"/><ellipse cx="13" cy="28" rx="10" ry="11" fill="#2a2320"/></symbol>
+    <symbol id="pumpkin" viewBox="0 0 30 26"><ellipse cx="15" cy="15" rx="14" ry="10" fill="#e8772e"/><path d="M15 5 V15 M8 7 Q6 15 9 23 M22 7 Q24 15 21 23" stroke="#c35d1a" fill="none"/><rect x="13" y="1" width="4" height="6" rx="1" fill="#5d7a3a"/></symbol>
+  </defs>
+</svg>
+
+<header class="hero wrap">
+  <div class="eyebrow">KASUMI 1ST BIRTHDAY PHOTO</div>
+  <h1>佳純 1歳 撮影進行表</h1>
+  <p>この順番どおりに進めれば、撮りたいショットが全部そろう段取りにしています</p>
+  <div class="meta">
+    <span>📅 2026.11.5</span>
+    <span>📍 Studio Pasha Kobe（白壁・自然光）</span>
+    <span>🎃 ハロウィン生まれ</span>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="wrap">
+    <nav aria-label="セクション">
+      <a href="#plan">流れ</a>
+      <a href="#s1">①家族</a>
+      <a href="#s2">②佳純ソロ</a>
+      <a href="#s3">③ケーキ</a>
+      <a href="#s4">④ハロウィン</a>
+      <a href="#ideas">構図アイデア</a>
+      <a href="#prep">持ち物</a>
+    </nav>
+    <div class="count" id="count">0 / 0</div>
+  </div>
+</div>
+
+<main class="wrap">
+
+<section>
+  <div class="box">
+    <h3>📣 カメラマンさん・夫へ　今日の作戦（3つだけ）</h3>
+    <ul class="tight">
+      <li><b>家族写真と茜音の出番を「最初」に。</b>お宮参りのときは後半に回して撮りそびれたので、全員の機嫌がいい最初の20分で集合ショットを撮りきります。</li>
+      <li><b>茜音には「お手伝い係」の役目を。</b>ガラガラであやす、カードを並べる、ケーキを運ぶなど。待ち時間がなくなり、自然な姉妹ショットにもなります。</li>
+      <li><b>ケーキは「ケーキだけ」を先に。</b>佳純が触ると戻らないので、きれいなうちに撮ってから佳純を座らせます。</li>
+    </ul>
+  </div>
+</section>
+
+<section id="plan">
+  <h2><span class="num">⏱</span>全体の流れ（2時間の目安）</h2>
+  <p class="lead">時間は目安です。佳純がぐずったら、③の「抱っこ」か休憩に飛んで立て直します。</p>
+  <div class="timeline">
+    <div class="tl break"><div class="time">0:00〜0:10</div><div class="what">到着・荷ほどき・場慣れ</div><div class="note">白ワンピは家で着せていくとラクです。スタジオで少し遊ばせ、カメラマンさんに慣れてもらう</div></div>
+    <div class="tl"><div class="time">0:10〜0:40</div><div class="what">① 家族・姉妹（白コーデ）</div><div class="note">座り → 立ち抱っこ → 姉妹 → 家族で絵本 → 組み合わせ（ママ/パパ×佳純・茜音）→ ママのポートフォリオ用</div></div>
+    <div class="tl"><div class="time">0:40〜1:00</div><div class="what">② 佳純ソロ（白ワンピース）</div><div class="note">足型と花 → 絵本 → 選び取りカード → バナー → 抱っこ</div></div>
+    <div class="tl break"><div class="time">1:00〜1:10</div><div class="what">着替え（チュールスカート）・おやつ・水分</div><div class="note">この間にケーキと椅子をセット</div></div>
+    <div class="tl"><div class="time">1:10〜1:30</div><div class="what">③ ケーキ＆お人形（チュール）</div><div class="note">ケーキだけ → 椅子でケーキ → 姉妹でケーキ → お人形抱っこ</div></div>
+    <div class="tl break hw"><div class="time">1:30〜1:40</div><div class="what">デコ替え＆黒い服へお着替え</div><div class="note">夫：机のデコ担当／私：二人のお着替え担当</div></div>
+    <div class="tl hw"><div class="time">1:40〜1:55</div><div class="what">④ ハロウィン（黒コーデ）</div><div class="note">佳純ソロ → 姉妹 → 家族 → 小物の寄り</div></div>
+    <div class="tl break"><div class="time">1:55〜2:00</div><div class="what">撮り残しチェック・片付け</div><div class="note">このページのチェックが付いていないショットだけ追加で撮る</div></div>
+  </div>
+</section>
+
+<!-- ============ SCENE 1 ============ -->
+<section id="s1">
+  <div class="scene-head">
+    <h2><span class="num">1</span>家族・姉妹ショット</h2>
+    <div class="outfit"><span>佳純：持参の白ワンピース</span><span>茜音：かりんさんの白ドレス</span><span>パパ・ママ：白〜ベージュ系</span></div>
+    <p class="goal">いちばん大事なパートです。全員の機嫌がいいうちに撮りきります。</p>
+  </div>
+
+  <article class="shot" data-id="F1">
+    <div class="pic"><img src="images/ref-0009.jpg" alt="長女のときのソファでの家族写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">F1</span><h3>家族で座ってる写真</h3><span class="tag must">最優先</span></div>
+      <ul>
+        <li><b>A. ソファに横並び</b>：パパ・ママの間に茜音、佳純はママのひざ。全員カメラ目線の1枚を最初に</li>
+        <li><b>B. 床にぺたんと座る</b>：パパのあぐらに茜音、ママのひざに佳純。少し引いて白い床を広く入れる</li>
+        <li><b>C. 寄り</b>：顔を近づけて佳純を囲む（参考：茜音のとき 0013 の寄り）</li>
+      </ul>
+      <div class="role">👀 目線は、カメラの真上でママかパパの片方が呼びかけると揃いやすいです</div>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="F2">
+    <div class="pic"><img src="images/ref-0092.jpg" alt="長女のときの立ち抱っこの家族写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">F2</span><h3>家族で立って抱っこしてる写真</h3><span class="tag must">最優先</span></div>
+      <ul>
+        <li><b>A. 白壁の前で全身</b>：パパが佳純を抱っこ、ママは茜音と手つなぎ。全員正面</li>
+        <li><b>B. 見つめ合い</b>：パパ・ママ・茜音が佳純を見て笑う（カメラ目線なしで自然に）</li>
+        <li><b>C. 窓ぎわの逆光</b>：ふんわり明るい横長カット（参考 0080）</li>
+        <li><b>D. 茜音を抱っこ担当に交代</b>：ママが茜音、パパが佳純を抱っこして2組並ぶ</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="F3">
+    <div class="pic">
+      <svg viewBox="0 0 240 180" role="img" aria-label="姉妹が並んで座り、お姉ちゃんが妹をぎゅっとする構図のイラスト">
+        <rect width="240" height="180" fill="#f4efe8"/><rect y="130" width="240" height="50" fill="#ebe4da"/>
+        <use href="#ane" x="88" y="70" width="38" height="76"/>
+        <use href="#baby" x="120" y="92" width="34" height="52"/>
+        <path d="M112 104 Q130 98 140 110" stroke="#e1d6c8" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <text x="120" y="30" text-anchor="middle" font-size="13" fill="#a7656a">ぎゅー ♡</text>
+      </svg>
+      <span class="cap">イメージ</span>
+    </div>
+    <div class="body">
+      <div class="top"><span class="id">F3</span><h3>姉妹ショット</h3><span class="tag new">追加提案</span></div>
+      <ul>
+        <li><b>A. 並んでおすわり</b>：茜音が佳純を後ろからぎゅー</li>
+        <li><b>B. ほっぺにちゅー</b>：茜音から佳純へ。連写でお願いします</li>
+        <li><b>C. 後ろ姿</b>：手をつないで窓のほうを見ている姉妹</li>
+        <li><b>D. 寝転び俯瞰</b>：床に二人で寝転んで、上から撮る</li>
+      </ul>
+      <div class="role">💡 茜音に「佳純ちゃんのお誕生日だから、お姉ちゃんがぎゅーしてあげて」と事前にお願いしておく</div>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="F4">
+    <div class="pic"><img src="images/ref-0068.jpg" alt="長女のときの家族で絵本を読む写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">F4</span><h3>家族で絵本（余裕があれば）</h3><span class="tag">流れでOK</span></div>
+      <ul>
+        <li>床に4人で座って、パパが絵本を読む。茜音がページをめくる係</li>
+        <li>この流れのまま、次の「佳純ソロ・絵本」につなげるとスムーズ</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="F5">
+    <div class="pic">
+      <svg viewBox="0 0 240 180" role="img" aria-label="ママと佳純、パパと佳純などの組み合わせを並べたイラスト">
+        <rect width="240" height="180" fill="#f4efe8"/>
+        <g font-size="16" font-weight="700" fill="#c98d6b">
+          <text x="10" y="22">①</text><use href="#mama" x="34" y="6" width="34" height="76"/><use href="#baby" x="50" y="24" width="20" height="30"/>
+          <text x="124" y="22">②</text><use href="#mama" x="148" y="6" width="34" height="76"/><use href="#baby" x="164" y="24" width="20" height="30"/><use href="#ane" x="184" y="36" width="22" height="46"/>
+          <text x="124" y="110">④</text><use href="#papa" x="148" y="94" width="34" height="76"/><use href="#baby" x="164" y="112" width="20" height="30"/><use href="#ane" x="184" y="124" width="22" height="46"/>
+          <text x="10" y="110">③</text><use href="#papa" x="34" y="94" width="34" height="76"/><use href="#baby" x="50" y="112" width="20" height="30"/>
+        </g>
+      </svg>
+      <span class="cap">イメージ</span>
+    </div>
+    <div class="body">
+      <div class="top"><span class="id">F5</span><h3>組み合わせバリエーション</h3><span class="tag must">全部ほしい</span></div>
+      <ul>
+        <li><b>① ママ＋佳純</b>：窓ぎわで抱っこ、見つめ合い（参考 0104）</li>
+        <li><b>② ママ＋佳純＋茜音</b>：ママが佳純を抱っこ、茜音はママの脚にくっつく</li>
+        <li><b>③ パパ＋佳純</b>：高い高い／パパの胸で抱っこ</li>
+        <li><b>④ パパ＋佳純＋茜音</b>：床に座ったパパのひざに姉妹</li>
+      </ul>
+      <div class="role">💡 入れ替えはテンポよく。抜けた大人はカメラの後ろであやし役に回ると、目線ももらえます</div>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="F6">
+    <div class="pic">
+      <svg viewBox="0 0 240 180" role="img" aria-label="ママがカメラを見て、子どもは後ろ姿で抱っこされている構図">
+        <rect width="240" height="180" fill="#f4efe8"/>
+        <g fill="#fff" stroke="#e1d6c8"><rect x="150" y="10" width="70" height="120"/></g>
+        <circle cx="110" cy="62" r="26" fill="#5a4a42"/><circle cx="110" cy="66" r="19" fill="#f2d7c3"/>
+        <path d="M60 180 Q66 110 110 100 Q154 110 160 180Z" fill="#e9dccb"/>
+        <circle cx="140" cy="104" r="16" fill="#4a3c35"/><ellipse cx="140" cy="134" rx="18" ry="20" fill="#fff" stroke="#e1d6c8"/>
+        <text x="40" y="30" font-size="11" fill="#a7656a">ママだけ顔出し</text>
+      </svg>
+      <span class="cap">イメージ</span>
+    </div>
+    <div class="body">
+      <div class="top"><span class="id">F6</span><h3>ママのポートフォリオ用（子どもの顔は写さない）</h3><span class="tag new">追加</span></div>
+      <ul>
+        <li><b>肩越し抱っこ</b>：佳純をママの肩にもたれさせて後ろ頭だけ、ママがカメラを見る／窓の外を見る</li>
+        <li><b>手元＋ママの横顔</b>：佳純の小さな手を握るママ。子どもは手と髪だけ</li>
+        <li><b>前ボケ</b>：手前に子どもの後ろ頭をぼかして入れ、ピントはママの顔</li>
+        <li><b>ママだけ</b>：窓ぎわでママのみのカットも数枚（子どもが休憩中でOK）</li>
+      </ul>
+      <div class="role">📸 カメラマンさんへ：SNS・ポートフォリオに使うため「子どもの顔が分からない」ことが条件です。時間がなければ ①→② の間のお着替えタイムに撮ってください</div>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+</section>
+
+<!-- ============ SCENE 2 ============ -->
+<section id="s2">
+  <div class="scene-head">
+    <h2><span class="num">2</span>佳純ソロ（白ワンピース）</h2>
+    <div class="outfit"><span>佳純：白ワンピース</span><span>茜音：そのまま／お手伝い係</span></div>
+    <p class="goal">集中力が続く順に並べています。カメラの後ろで、茜音とパパが盛り上げ役です。</p>
+  </div>
+
+  <article class="shot" data-id="S1">
+    <div class="pic"><img src="images/ref-0033.jpg" alt="長女のときのフレームと花の写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">S1</span><h3>足型と花を持ってる写真</h3></div>
+      <ul>
+        <li>白壁の前でおすわり。足型フレームを横に立てて、花は小さめのブーケを手に持たせる</li>
+        <li><b>引き（全身＋フレーム）</b>と、<b>寄り（手元の花＋足型）</b>の2パターン</li>
+        <li>花を口に入れる前に勝負。持たせたらすぐシャッター</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="S2">
+    <div class="pic"><img src="images/ref-0016.jpg" alt="長女のときの絵本と床でおすわりの写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">S2</span><h3>絵本を読んでる写真</h3></div>
+      <ul>
+        <li>床に絵本を数冊広げて、自由にめくらせる（参考 0014〜0017）</li>
+        <li>横顔で絵本をのぞきこむ寄りカットも</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="S3">
+    <div class="pic"><img src="images/ref-0058.jpg" alt="長女のときの選び取りカードの写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">S3</span><h3>選び取りカード</h3></div>
+      <ul>
+        <li>カードを床に2列でななめに並べる（並べるのは茜音の役目）</li>
+        <li><b>①カードだけの俯瞰</b> → <b>②取りに行く後ろ姿</b> → <b>③選んだカードを掲げる顔</b> の順番で</li>
+        <li>何を選んだかをメモしておくと、あとでアルバムに書けます：<input type="text" placeholder="選んだカード" aria-label="選んだカード" style="font:inherit;border:1px solid var(--line);border-radius:8px;padding:2px 8px;width:9em"></li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="S4">
+    <div class="pic"><img src="images/ref-0162.jpg" alt="長女のときのバースデーバナーの写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">S4</span><h3>バースデーバナー写真</h3></div>
+      <ul>
+        <li>白壁にバナーを貼り、その下でおすわり。<b>縦長で、頭の上に余白を広めに</b></li>
+        <li>壁にタッチする後ろ姿も、茜音のとき（0158〜0161）のようにかわいく撮れます</li>
+        <li>余裕があれば、最後に茜音も入って姉妹で</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="S5">
+    <div class="pic"><img src="images/ref-0104.jpg" alt="長女のときのママ抱っこの写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">S5</span><h3>佳純の抱っこ</h3><span class="tag">ぐずった時にも</span></div>
+      <ul>
+        <li><b>ママ抱っこ</b>：窓ぎわで、ママと見つめ合って笑う寄りカット</li>
+        <li><b>パパ抱っこ</b>：高い高いの瞬間</li>
+        <li><b>お姉ちゃん抱っこ</b>：茜音のひざに座らせる（支えは大人がフレーム外から）</li>
+      </ul>
+      <div class="role">💡 機嫌が悪くなったら、このカットを前倒しで。抱っこで落ち着いたら元の順番に戻ります</div>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+</section>
+
+<div class="interlude">
+  <b>👗 お着替えタイム（約10分）</b><br>
+  佳純 → チュールスカート／茜音 → 白ドレスのまま<br>
+  <span style="color:var(--sub);font-size:14px">この間に夫とカメラマンさんで椅子とケーキをセット。おやつと水分補給もここで。</span>
+</div>
+
+<!-- ============ SCENE 3 ============ -->
+<section id="s3">
+  <div class="scene-head tulle">
+    <h2><span class="num" style="background:var(--tulle-ink)">3</span>ケーキ＆お人形（チュール）</h2>
+    <div class="outfit"><span>佳純：チュールスカート</span><span>茜音：白ドレスのまま</span></div>
+  </div>
+
+  <article class="shot" data-id="C1">
+    <div class="pic"><img src="images/ref-0153.jpg" alt="長女のときのケーキだけの写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">C1</span><h3>ケーキだけのショット</h3><span class="tag must">先に撮る</span></div>
+      <ul>
+        <li>佳純が触る前に撮ります。窓の光と影を入れたカットが素敵でした（0152〜0155）</li>
+        <li>真横・ななめ上・トッパーの寄りの3カット</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="C2">
+    <div class="pic"><img src="images/ref-0124.jpg" alt="長女のときの椅子とケーキの写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">C2</span><h3>椅子でケーキショット</h3></div>
+      <ul>
+        <li>木の椅子にケーキをのせ、横に佳純を立たせる（つかまり立ち）／おすわり</li>
+        <li><b>引きの全身</b> → <b>ケーキに手を伸ばす後ろ姿</b>（参考 0137） → <b>顔の寄り</b></li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="C3">
+    <div class="pic">
+      <svg viewBox="0 0 240 180" role="img" aria-label="ケーキをはさんで姉妹が座る構図のイラスト">
+        <rect width="240" height="180" fill="#f8eeee"/><rect y="132" width="240" height="48" fill="#efe3e1"/>
+        <use href="#ane" x="52" y="72" width="38" height="76"/>
+        <rect x="104" y="112" width="34" height="22" rx="3" fill="#fff" stroke="#e5d6d3"/><rect x="114" y="134" width="14" height="8" fill="#e5d6d3"/>
+        <text x="121" y="106" text-anchor="middle" font-size="12" fill="#c49a5a">One</text>
+        <use href="#baby" x="148" y="94" width="34" height="52"/>
+        <text x="120" y="32" text-anchor="middle" font-size="13" fill="#a7656a">おめでとう！</text>
+      </svg>
+      <span class="cap">イメージ</span>
+    </div>
+    <div class="body">
+      <div class="top"><span class="id">C3</span><h3>姉妹でケーキ</h3><span class="tag new">追加提案</span></div>
+      <ul>
+        <li>ケーキを真ん中に、茜音と佳純で両側から。茜音が「おめでとう」と拍手</li>
+        <li>茜音がケーキを運んでくる動きのカットも（運ぶのはダミーやトレイでもOK）</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="C4">
+    <div class="pic"><img src="images/ref-0184.jpg" alt="長女のときのくまを抱っこする写真" loading="lazy"><span class="cap">参考：茜音のとき</span></div>
+    <div class="body">
+      <div class="top"><span class="id">C4</span><h3>お人形抱っこ</h3></div>
+      <ul>
+        <li>椅子にすわって、お人形をぎゅっと（参考 0181〜0185）。窓ぎわの光で</li>
+        <li>床でおすわり＋お人形の寄り（参考 0040）</li>
+        <li>最後に<b>お人形だけ椅子に座らせた「余韻カット」</b>（参考 0187）</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+</section>
+
+<div class="interlude hw">
+  <b style="color:var(--hw)">🎃 デコ替え＆お着替え（約10分）</b><br>
+  茜音・佳純 → 黒の服へ／机にハロウィンデコ<br>
+  <span style="color:var(--sub);font-size:14px">夫：机のデコ（かぼちゃ・ガーランドなど）／私：二人のお着替え。白い背景はそのままで、黒い服が引き立ちます。</span>
+</div>
+
+<!-- ============ SCENE 4 ============ -->
+<section id="s4" class="hwscene">
+  <div class="scene-head hw">
+    <h2><span class="num" style="background:var(--hw)">4</span>ハロウィン（黒コーデ）</h2>
+    <div class="outfit"><span>茜音・佳純：黒の服</span><span>パパ・ママ：黒の小物（帽子など）があれば</span></div>
+    <p class="goal">ハロウィン生まれの佳純だけの特別カット。最後のパートなので短く撮りきります。</p>
+  </div>
+
+  <article class="shot" data-id="H1">
+    <div class="pic">
+      <svg viewBox="0 0 240 180" role="img" aria-label="ハロウィンデコの机の前に佳純が座る構図のイラスト">
+        <rect width="240" height="180" fill="#f6f1ea"/>
+        <path d="M30 30 Q75 52 120 30 Q165 52 210 30" stroke="#2a2320" fill="none"/>
+        <g fill="#e8772e"><path d="M48 38 l6 12 l6 -10z"/><path d="M90 44 l6 12 l6 -12z"/><path d="M140 44 l6 12 l6 -12z"/><path d="M182 38 l6 12 l6 -10z"/></g>
+        <rect x="40" y="96" width="160" height="10" rx="2" fill="#a07a58"/><rect x="50" y="106" width="8" height="50" fill="#a07a58"/><rect x="182" y="106" width="8" height="50" fill="#a07a58"/>
+        <use href="#pumpkin" x="52" y="72" width="34" height="28"/><use href="#pumpkin" x="152" y="76" width="26" height="22"/>
+        <rect x="96" y="66" width="44" height="30" rx="3" fill="#2a2320"/><text x="118" y="80" text-anchor="middle" font-size="7" fill="#fff">Born on</text><text x="118" y="90" text-anchor="middle" font-size="7" fill="#e8772e">Halloween</text>
+        <use href="#baby-hw" x="104" y="124" width="30" height="46"/>
+      </svg>
+      <span class="cap">イメージ</span>
+    </div>
+    <div class="body">
+      <div class="top"><span class="id">H1</span><h3>デコ机と佳純</h3><span class="tag">ハロウィン</span></div>
+      <ul>
+        <li>デコした机の前（または机の上の低い位置）に佳純がおすわり。机全体が入る引きで</li>
+        <li>小さいかぼちゃを持たせて寄り</li>
+        <li>💡「Born on Halloween」「1st Halloween Birthday」などのボードを入れると、誕生日の意味が伝わります</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="H2">
+    <div class="pic">
+      <svg viewBox="0 0 240 180" role="img" aria-label="黒い服の姉妹がかぼちゃを持って並ぶ構図のイラスト">
+        <rect width="240" height="180" fill="#f6f1ea"/><rect y="134" width="240" height="46" fill="#ece5db"/>
+        <use href="#ane-hw" x="74" y="70" width="40" height="80"/>
+        <path d="M80 70 L94 44 L108 70 Z" fill="#2a2320"/>
+        <use href="#baby-hw" x="124" y="96" width="34" height="52"/>
+        <use href="#pumpkin" x="104" y="130" width="30" height="24"/>
+      </svg>
+      <span class="cap">イメージ</span>
+    </div>
+    <div class="body">
+      <div class="top"><span class="id">H2</span><h3>ハロウィン姉妹</h3><span class="tag new">追加提案</span></div>
+      <ul>
+        <li>黒コーデの二人がかぼちゃを間に並んでおすわり</li>
+        <li>茜音が佳純にお菓子をあげる「トリック・オア・トリート」のやりとりを連写</li>
+        <li>魔女帽子などの小物があれば茜音に</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="H3">
+    <div class="pic">
+      <svg viewBox="0 0 240 180" role="img" aria-label="ハロウィンデコの前で家族4人が並ぶ構図のイラスト">
+        <rect width="240" height="180" fill="#f6f1ea"/><rect y="140" width="240" height="40" fill="#ece5db"/>
+        <use href="#pumpkin" x="20" y="120" width="30" height="24"/><use href="#pumpkin" x="194" y="124" width="26" height="20"/>
+        <use href="#papa" x="62" y="44" width="44" height="100"/>
+        <use href="#mama" x="134" y="46" width="44" height="98"/>
+        <use href="#ane-hw" x="104" y="88" width="30" height="58"/>
+        <use href="#baby-hw" x="70" y="72" width="26" height="40"/>
+      </svg>
+      <span class="cap">イメージ</span>
+    </div>
+    <div class="body">
+      <div class="top"><span class="id">H3</span><h3>ハロウィン家族</h3><span class="tag new">追加提案</span></div>
+      <ul>
+        <li>デコの前で4人。パパが佳純を抱っこ、ママは茜音と手をつなぐ</li>
+        <li>大人の服は白のままでも大丈夫。黒い小物を1つ足すと統一感が出ます</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+
+  <article class="shot" data-id="H4">
+    <div class="pic">
+      <svg viewBox="0 0 240 180" role="img" aria-label="小さな手とかぼちゃの寄りのイラスト">
+        <rect width="240" height="180" fill="#f6f1ea"/>
+        <use href="#pumpkin" x="70" y="58" width="100" height="86"/>
+        <ellipse cx="78" cy="110" rx="20" ry="14" fill="#f2d7c3"/><ellipse cx="162" cy="112" rx="20" ry="14" fill="#f2d7c3"/>
+      </svg>
+      <span class="cap">イメージ</span>
+    </div>
+    <div class="body">
+      <div class="top"><span class="id">H4</span><h3>小物の寄り（ディテール）</h3></div>
+      <ul>
+        <li>小さな手でかぼちゃを持つ寄り、足元、デコだけのカット</li>
+        <li>アルバムのすき間を埋める写真になります</li>
+      </ul>
+      <label class="check"><input type="checkbox">撮れた</label>
+    </div>
+  </article>
+</section>
+
+<!-- ============ IDEAS ============ -->
+<section id="ideas">
+  <h2><span class="num">✦</span>家族写真の構図アイデア</h2>
+  <p class="lead">F1〜F3 で時間が余ったら、または撮影の合間に。上から順におすすめです。</p>
+  <div class="ideas">
+    <div class="idea">
+      <div class="art">
+        <svg viewBox="0 0 240 180" role="img" aria-label="4人が床に寝転んで頭を寄せ、上から撮る構図">
+          <rect width="240" height="180" fill="#f4efe8"/>
+          <g transform="translate(120 90)"><use href="#papa" x="-18" y="12" width="36" height="76"/></g>
+          <g transform="translate(120 90) rotate(180)"><use href="#mama" x="-18" y="12" width="36" height="76"/></g>
+          <g transform="translate(120 90) rotate(90)"><use href="#ane" x="-14" y="12" width="28" height="56"/></g>
+          <g transform="translate(120 90) rotate(-90)"><use href="#baby" x="-12" y="12" width="24" height="36"/></g>
+          <text x="10" y="20" font-size="11" fill="#7a6f66">上から見た図</text>
+        </svg>
+      </div>
+      <div class="txt"><h3>① 寝転び俯瞰</h3><p>4人が床に寝転んで頭を真ん中に寄せ、カメラマンさんは脚立か椅子の上から。1歳でもじっとしなくていいので撮りやすい構図です。</p></div>
+    </div>
+    <div class="idea">
+      <div class="art"><img src="images/ref-0189.jpg" alt="長女のときの紙吹雪を投げる家族写真" loading="lazy"></div>
+      <div class="txt"><h3>② 紙吹雪・花びら</h3><p>茜音のときいちばん盛り上がった構図（参考 0188〜0192）。茜音に投げる係をしてもらうと、笑顔が自然に出ます。最後に撮ると片付けもラクです。</p></div>
+    </div>
+    <div class="idea">
+      <div class="art">
+        <svg viewBox="0 0 240 180" role="img" aria-label="家族4人が手をつなぎ窓に向かって歩く後ろ姿の構図">
+          <rect width="240" height="180" fill="#f4efe8"/>
+          <g fill="#fff" stroke="#e1d6c8"><rect x="30" y="16" width="56" height="100"/><rect x="92" y="16" width="56" height="100"/><rect x="154" y="16" width="56" height="100"/></g>
+          <rect y="126" width="240" height="54" fill="#ebe4da"/>
+          <use href="#papa" x="48" y="60" width="40" height="90"/>
+          <use href="#ane" x="90" y="92" width="28" height="56"/>
+          <use href="#mama" x="122" y="60" width="40" height="90"/>
+          <use href="#baby" x="152" y="62" width="22" height="34"/>
+          <path d="M80 108 Q90 116 98 112 M112 112 Q120 116 130 108" stroke="#c9b9a6" stroke-width="3" fill="none"/>
+        </svg>
+      </div>
+      <div class="txt"><h3>③ 窓に向かう後ろ姿</h3><p>パパ・茜音・ママで手をつなぎ、ママは佳純を抱っこ。顔が写らなくても家族の雰囲気が残る1枚です。</p></div>
+    </div>
+    <div class="idea">
+      <div class="art"><img src="images/ref-0013.jpg" alt="長女のときの寄りの家族写真" loading="lazy"></div>
+      <div class="txt"><h3>④ ぎゅっと寄り</h3><p>4人の顔を寄せて胸から上だけ。茜音を真ん中に入れると、お姉ちゃんが主役になれる1枚にもなります。</p></div>
+    </div>
+    <div class="idea">
+      <div class="art"><img src="images/ref-0087.jpg" alt="長女のときのパパの脚に抱きつく写真" loading="lazy"></div>
+      <div class="txt"><h3>⑤ 足もとショット</h3><p>パパの脚に抱きつく佳純を低い位置から。茜音も反対側の脚にくっつけば姉妹版になります（参考 0086〜0089）。</p></div>
+    </div>
+    <div class="idea">
+      <div class="art">
+        <svg viewBox="0 0 240 180" role="img" aria-label="パパが茜音を肩車し、ママが佳純を抱っこする構図">
+          <rect width="240" height="180" fill="#f4efe8"/><rect y="146" width="240" height="34" fill="#ebe4da"/>
+          <use href="#papa" x="64" y="62" width="40" height="90"/>
+          <use href="#ane" x="70" y="22" width="28" height="56"/>
+          <use href="#mama" x="134" y="62" width="40" height="90"/>
+          <use href="#baby" x="140" y="82" width="26" height="40"/>
+        </svg>
+      </div>
+      <div class="txt"><h3>⑥ 肩車＋抱っこ</h3><p>パパが茜音を肩車、ママが佳純を抱っこ。高さに差が出て、動きのある楽しい1枚になります。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PREP ============ -->
+<section id="prep">
+  <h2><span class="num">✓</span>持ち物チェック</h2>
+  <div class="grid2">
+    <div class="box">
+      <h3>👗 衣装</h3>
+      <ul class="tight" data-prep>
+        <li><label><input type="checkbox"> 佳純 白ワンピース</label></li>
+        <li><label><input type="checkbox"> 佳純 チュールスカート</label></li>
+        <li><label><input type="checkbox"> 茜音 白ドレス（かりんさんから）</label></li>
+        <li><label><input type="checkbox"> 茜音・佳純 黒の服</label></li>
+        <li><label><input type="checkbox"> パパ・ママの服（白〜ベージュ）</label></li>
+        <li><label><input type="checkbox"> 着替え予備・スタイ</label></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>🎂 小物</h3>
+      <ul class="tight" data-prep>
+        <li><label><input type="checkbox"> 足型（フレーム）</label></li>
+        <li><label><input type="checkbox"> 花・小さめのブーケ</label></li>
+        <li><label><input type="checkbox"> 絵本 数冊</label></li>
+        <li><label><input type="checkbox"> 選び取りカード</label></li>
+        <li><label><input type="checkbox"> バースデーバナー・貼るテープ</label></li>
+        <li><label><input type="checkbox"> ケーキ・ケーキトッパー</label></li>
+        <li><label><input type="checkbox"> お人形</label></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>🎃 ハロウィン</h3>
+      <ul class="tight" data-prep>
+        <li><label><input type="checkbox"> 机のデコ（かぼちゃ・ガーランド）</label></li>
+        <li><label><input type="checkbox"> ボード（Born on Halloween など）</label></li>
+        <li><label><input type="checkbox"> 魔女帽子など頭の小物</label></li>
+        <li><label><input type="checkbox"> 大人用の黒い小物（任意）</label></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>🧸 ぐずり対策</h3>
+      <ul class="tight" data-prep>
+        <li><label><input type="checkbox"> おやつ・飲み物（二人分）</label></li>
+        <li><label><input type="checkbox"> 音の出るおもちゃ（あやし用）</label></li>
+        <li><label><input type="checkbox"> 茜音の好きなおもちゃ・ごほうび</label></li>
+        <li><label><input type="checkbox"> ウェットティッシュ・おむつ</label></li>
+        <li><label><input type="checkbox"> 紙吹雪（構図アイデア②用）</label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  チェックはこの端末に保存されます（家族それぞれのスマホで別々です）<br>
+  <button class="reset" type="button" id="reset">チェックをリセット</button>
+</footer>
+
+<script>
+(function(){
+  var KEY = 'kasumi-1st-shotlist-v1';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.shot'));
+  var count = document.getElementById('count');
+  function update(){
+    var done = shots.filter(function(s){ return s.classList.contains('done'); }).length;
+    count.textContent = '撮れた ' + done + ' / ' + shots.length;
+  }
+
+  shots.forEach(function(shot){
+    var id = shot.dataset.id;
+    var box = shot.querySelector('.check input');
+    box.checked = !!state[id];
+    shot.classList.toggle('done', box.checked);
+    box.addEventListener('change', function(){
+      state[id] = box.checked; shot.classList.toggle('done', box.checked); save(); update();
+    });
+  });
+
+  document.querySelectorAll('[data-prep] input').forEach(function(box, i){
+    var id = 'prep' + i;
+    box.checked = !!state[id];
+    box.addEventListener('change', function(){ state[id] = box.checked; save(); });
+  });
+
+  var memo = document.querySelector('#s2 input[type=text]');
+  if (memo) {
+    memo.value = state.card || '';
+    memo.addEventListener('input', function(){ state.card = memo.value; save(); });
+  }
+
+  document.getElementById('reset').addEventListener('click', function(){
+    if (!confirm('チェックをすべて外しますか？')) return;
+    state = {}; save();
+    document.querySelectorAll('input[type=checkbox]').forEach(function(b){ b.checked = false; });
+    shots.forEach(function(s){ s.classList.remove('done'); });
+    if (memo) memo.value = '';
+    update();
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
