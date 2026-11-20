@@ -194,3 +194,19 @@ const LP = (() => {
     show((r && (r.message || r.name)) || String(r));
   });
 })();
+
+// 新しい版が出ていたら自動で読み込み直す（ブラウザに古いページが残っても大丈夫なように）
+(() => {
+  const CUR = "20261120c";
+  fetch("version.json?t=" + Date.now(), { cache: "no-store" })
+    .then((r) => r.json())
+    .then(({ v }) => {
+      if (!v || v === CUR) return;
+      const key = "lp.reloaded." + v;
+      try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch {}
+      const u = new URL(location.href);
+      u.searchParams.set("v", v);
+      location.replace(u.toString());
+    })
+    .catch(() => {});
+})();
