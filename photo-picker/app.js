@@ -20,9 +20,14 @@
 
   // ------------------------------------------------------------ data
   const sortKey = (p) => `${p.month}|${p.dt || "9"}|${p.name}`;
+  // 画面で触っている写真オブジェクトはそのまま使い続ける（読み直しで ♥ が古い状態に戻らないように）
   async function load() {
-    photos = (await idb.all("meta")).sort((a, b) => (sortKey(a) < sortKey(b) ? -1 : 1));
+    const stored = await idb.all("meta");
+    photos = stored.map((m) => byId.get(m.id) || m).sort((a, b) => (sortKey(a) < sortKey(b) ? -1 : 1));
     byId = new Map(photos.map((p) => [p.id, p]));
+    recomputeMonths();
+  }
+  function recomputeMonths() {
     // 他の端末で ♥ を付けた月（この端末に未取り込み）も月ボタンに出す
     months = [...new Set(photos.map((p) => p.month).concat(extras().map((o) => o.month)))].filter(Boolean).sort();
     if (!months.includes(curMonth)) curMonth = months[0] || null;
@@ -32,6 +37,7 @@
     if (p.sel === on) return;
     p.sel = on;
     p.selAt = Date.now();
+    p.synced = false;
     paintSel(p);
     if (navigator.vibrate) navigator.vibrate(8);
     try {
@@ -607,17 +613,15 @@
 
   // ------------------------------------------------------------ 照合 (リスト/スプシ → ♥)
   function findPhoto(it) {
-    const st = LP.stem(it.name);
-    return (it.dt && photos.find((x) => x.dt === it.dt && LP.stem(x.name) === st)) ||
-      (it.dt && photos.find((x) => x.dt === it.dt)) ||
-      (!it.dt && photos.find((x) => LP.stem(x.name) === st && x.month === it.month)) || null;
+    return indexer()(it);
   }
   // items を ♥ にする。見つからない分は orphans として保持（あとで取り込んだら自動で ♥）
   async function applyList(items) {
     let hit = 0;
     const miss = [];
+    const match = indexer();
     for (const it of items) {
-      const p = findPhoto(it);
+      const p = match(it);
       if (!p) { miss.push(it); continue; }
       hit++;
       if (!p.sel) { p.sel = true; p.selAt = Date.parse(it.at) || Date.now(); await idb.put("meta", p); }
@@ -642,7 +646,17 @@
   //  - この端末で前回の同期より後に外した ♥ → スプシから外す
   //  - 前回の同期では有ったのにスプシから消えている ♥ → 他の端末で外した → この端末でも外す
   let sheetUrl = null, orphans = [], remoteOnly = [], unsel = {}, syncTimer, syncing = false, dirty = false;
-  const skey = (it) => (it.dt ? it.dt : `${LP.stem(it.name)}|${it.month}`);
+  // 写真の見分け方: 撮影日時＋ファイル名（同じ秒に撮った連写も別の写真として扱う）
+  const skey = (it) => (it.dt ? `${it.dt}|${LP.stem(it.name)}` : `${LP.stem(it.name)}|${it.month}`);
+  // スプシの行 → この端末の写真（名前が変わっていても、同じ撮影日時の写真が1枚だけならそれ）
+  function indexer() {
+    const byKey = new Map(), byDt = new Map();
+    for (const p of photos) {
+      byKey.set(skey(p), p);
+      if (p.dt) (byDt.get(p.dt) || byDt.set(p.dt, []).get(p.dt)).push(p);
+    }
+    return (r) => byKey.get(skey(r)) || (r.dt && byDt.get(r.dt)?.length === 1 ? byDt.get(r.dt)[0] : null);
+  }
   const rowOf = (p) => ({ month: p.month, name: p.name, dt: p.dt || "", at: new Date(p.selAt || p.at || Date.now()).toISOString() });
 
   function setCloud(state, msg) {
@@ -681,15 +695,15 @@
     try {
       const remote = await pullSheet(sheetUrl);
       const lastSync = (await idb.get("kv", "lastSync")) || 0;
-      const local = new Map();
-      for (const p of photos) { const k = skey(p); if (!local.has(k) || p.sel) local.set(k, p); }
+      const match = indexer();
       const result = new Map();
       for (const r of remote) {
-        const k = skey(r);
-        if (unsel[k] > lastSync) continue;            // この端末で外した
-        const p = local.get(k) || findPhoto(r);
+        const p = match(r);
+        const k = p ? skey(p) : skey(r);
+        if (result.has(k)) continue;
+        if (unsel[k] > lastSync || unsel[r.dt || ""] > lastSync) continue;   // この端末で外した
         if (p) {
-          if (!p.sel) { p.sel = true; p.selAt = Math.min(Date.parse(r.at) || 0, start - 1) || start - 1; await idb.put("meta", p); changed++; }
+          if (!p.sel) { p.sel = true; p.synced = true; p.selAt = Math.min(Date.parse(r.at) || 0, start - 1) || start - 1; await idb.put("meta", p); changed++; }
           result.set(k, rowOf(p));
         } else result.set(k, { month: r.month, name: r.name, dt: r.dt || "", at: r.at || "" });
       }
@@ -697,8 +711,9 @@
         if (!p.sel) continue;
         const k = skey(p);
         if (result.has(k)) continue;
-        if ((p.selAt || p.at || 0) > lastSync) result.set(k, rowOf(p));   // この端末で新しく ♥
-        else { p.sel = false; await idb.put("meta", p); changed++; }       // 他の端末で外された
+        // 前回の同期より後に付けた ♥ → 追加。前回の同期で送ってあるのにスプシに無い → 他の端末で外された
+        if ((p.selAt || p.at || 0) >= lastSync || !p.synced) result.set(k, rowOf(p));
+        else { p.sel = false; await idb.put("meta", p); changed++; }
       }
       for (const o of orphans) {
         const k = skey(o);
@@ -707,7 +722,7 @@
       const localKeys = new Set(photos.map(skey));
       remoteOnly = [...result.entries()].filter(([k]) => !localKeys.has(k)).map(([, v]) => v);
       orphans = [];
-      await load();
+      recomputeMonths();
       const { m } = counts();
       const items = [...result.values()].sort((a, b) => (a.month + a.dt + a.name < b.month + b.dt + b.name ? -1 : 1));
       const r = await fetch(sheetUrl, {
@@ -717,6 +732,7 @@
       const j = await r.json();
       if (!j.ok) throw new Error("ng");
       await idb.put("kv", start, "lastSync");
+      for (const p of photos) if (p.sel && !p.synced && result.has(skey(p)) && (p.selAt || 0) < start) { p.synced = true; await idb.put("meta", p); }
       for (const k of Object.keys(unsel)) if (unsel[k] <= start) delete unsel[k];
       await idb.put("kv", unsel, "unsel");
       await idb.put("kv", remoteOnly, "remoteOnly");
