@@ -213,12 +213,15 @@
   // 同じPCのブラウザで ♥ を付けた分（スマホ用画面をPCで使った場合）
   (async () => {
     try {
-      const sel = (await LP.idb.all("meta")).filter((p) => p.sel);
-      if (!sel.length) return;
-      $("#localCount").textContent = sel.length;
+      const sel = (await LP.idb.all("meta")).filter((p) => p.sel).map((p) => ({ name: p.name, dt: p.dt || null, month: p.month }));
+      const extra = ((await LP.idb.get("kv", "remoteOnly")) || []).concat((await LP.idb.get("kv", "orphans")) || [])
+        .map((o) => ({ name: o.name, dt: o.dt || null, month: o.month }));
+      const items = sel.concat(extra);
+      if (!items.length) return;
+      $("#localCount").textContent = items.length;
       $("#useLocal").hidden = false;
       $("#listLabel").classList.replace("primary", "ghostbtn");
-      $("#useLocal").onclick = () => loadList(new File([JSON.stringify({ items: sel.map((p) => ({ name: p.name, dt: p.dt || null, month: p.month })) })], "local.json"));
+      $("#useLocal").onclick = () => loadList(new File([JSON.stringify({ items })], "local.json"));
     } catch {}
   })();
   $("#listFile").addEventListener("change", (e) => { if (e.target.files[0]) loadList(e.target.files[0]); e.target.value = ""; });
