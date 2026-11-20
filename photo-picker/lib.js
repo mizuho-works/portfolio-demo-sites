@@ -72,11 +72,24 @@ const LP = (() => {
   const stem = (name) => name.replace(/\.[^.]+$/, "").toLowerCase();
 
   // ---------------------------------------------------------- 画像
-  async function decode(file) {
+  // HEIC は ブラウザが読めないことが多いので、必要なときだけ変換ライブラリを読み込む
+  let heicLib;
+  function loadHeic() {
+    return (heicLib ||= new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "vendor/heic2any.min.js";
+      s.onload = () => res(window.heic2any);
+      s.onerror = () => { heicLib = null; rej(new Error("HEIC変換を読み込めませんでした")); };
+      document.head.appendChild(s);
+    }));
+  }
+  const isHeic = (f) => /\.(heic|heif)$/i.test(f.name || "") || /heic|heif/i.test(f.type || "");
+
+  async function decodePlain(blob) {
     if (window.createImageBitmap) {
-      try { return await createImageBitmap(file, { imageOrientation: "from-image" }); } catch {}
+      try { return await createImageBitmap(blob, { imageOrientation: "from-image" }); } catch {}
     }
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(blob);
     try {
       const img = new Image();
       img.decoding = "async";
@@ -86,6 +99,17 @@ const LP = (() => {
     } finally {
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
+  }
+  async function decode(file) {
+    try {
+      return await decodePlain(file);
+    } catch (e) {
+      if (!isHeic(file)) throw e;
+    }
+    const conv = await loadHeic();
+    let out = await conv({ blob: file, toType: "image/jpeg", quality: 0.92 });
+    if (Array.isArray(out)) out = out[0];
+    return decodePlain(out);
   }
   const dims = (src) => [src.naturalWidth || src.width, src.naturalHeight || src.height];
 
@@ -147,5 +171,5 @@ const LP = (() => {
     return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
   };
 
-  return { exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
+  return { isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
 })();

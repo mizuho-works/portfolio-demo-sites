@@ -254,3 +254,14 @@ body.pc { background: var(--bg); }
 .info ul { max-height: 200px; overflow: auto; padding-left: 20px; margin: 6px 0; font-size: 13px; }
 .info small { color: var(--muted); }
 .ptip { font-size: 11px !important; min-height: 0 !important; }
+.cloud { font-size: 11px; font-weight: 400; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+.cloud[data-s="err"] { color: var(--accent); }
+.sheetbox { margin-top: 12px; }
+.urlrow { display: flex; gap: 8px; }
+.urlrow input { flex: 1; min-width: 0; font: inherit; font-size: 13px; color: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; }
+.primary.sm { width: auto; padding: 9px 16px; }
+.howto { padding-left: 20px; font-size: 13px; color: var(--muted); line-height: 1.7; }
+.howto b { color: var(--ink); }
+.sheetbox summary { cursor: pointer; font-size: 13px; margin-top: 10px; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ghostbtn:disabled { opacity: .4; }

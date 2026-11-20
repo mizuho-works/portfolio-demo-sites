@@ -60,6 +60,21 @@
     $("#s1").classList.add("done");
   }
   $("#listFile").addEventListener("change", (e) => e.target.files[0] && loadList(e.target.files[0]));
+  try { $("#sheetUrl").value = localStorage.getItem("lp.sheetUrl") || ""; } catch {}
+  $("#sheetLoad").onclick = async () => {
+    const url = $("#sheetUrl").value.trim();
+    if (!url) return;
+    $("#listInfo").textContent = "読み込み中…";
+    try {
+      const j = await (await fetch(url, { cache: "no-store" })).json();
+      if (!j.ok) throw 0;
+      try { localStorage.setItem("lp.sheetUrl", url); } catch {}
+      const items = j.items.map((it) => ({ ...it, dt: it.dt || null }));
+      await loadList(new File([JSON.stringify({ items })], "sheet.json"));
+    } catch {
+      $("#listInfo").textContent = "スプシを読めませんでした。スマホの設定に貼ったのと同じURLか確認してください。";
+    }
+  };
   document.addEventListener("dragover", (e) => e.preventDefault());
   document.addEventListener("drop", (e) => {
     e.preventDefault();
@@ -70,7 +85,7 @@
   // ------------------------------------------------------------ 2. 元フォルダ → 照合
   $("#pickSrc").onclick = async () => {
     let dir;
-    try { dir = await showDirectoryPicker({ id: "lp-src", mode: "read" }); } catch { return; }
+    try { dir = await showDirectoryPicker({ id: "lp-src", mode: "read" }); } catch (e) { return pickError(e, $("#srcInfo")); }
     const info = $("#srcInfo");
     const since = list.items.reduce((a, it) => (it.month < a ? it.month : a), list.since || "2025-05");
     files = [];
@@ -123,7 +138,7 @@
   // ------------------------------------------------------------ 3. コピー
   $("#pickDest").onclick = async () => {
     let root;
-    try { root = await showDirectoryPicker({ id: "lp-dest", mode: "readwrite", startIn: "desktop" }); } catch { return; }
+    try { root = await showDirectoryPicker({ id: "lp-dest", mode: "readwrite", startIn: "documents" }); } catch (e) { return pickError(e, $("#destInfo")); }
     const info = $("#destInfo");
     const top = `L版印刷_${LP.stamp()}`;
     const out = await root.getDirectoryHandle(top, { create: true });
@@ -155,53 +170,79 @@
     await cw.close();
     info.innerHTML = `<b>✓ ${done}枚</b> を <code>${esc(root.name)}\\${top}</code> にまとめました。` +
       (errors.length ? `<br>⚠ ${errors.length}件失敗: ${errors.slice(0, 5).map(esc).join("<br>")}` : "") +
-      `<br><small>HEIC の写真はそのままコピーしています。写真屋さんが HEIC 非対応の場合は、Windows の「フォト」で JPEG に保存してください。</small>`;
+      ``;
     $("#s3").classList.add("done");
   };
 
   // ------------------------------------------------------------ スマホ用の軽い写真
-  $("#mkLight").onclick = async () => {
-    if (!canFS) return;
+  // ※ フォルダ選択は「クリック1回につき1回」しか開けないので、ボタンを2つに分けている
+  const DENIED = "Chromeの制限で、デスクトップやドライブ直下（D:\\ など）そのものは選べません。中に新しいフォルダ（例: D:\\スマホ用）を作って、それを選んでください。";
+  function pickError(e, el) {
+    if (e && e.name === "AbortError") return; // キャンセル
+    el.innerHTML = `⚠ フォルダを開けませんでした（${esc(e && e.message || e)}）<br>${DENIED}`;
+  }
+  let lightSrc = null;
+  $("#lightSrc").onclick = async () => {
+    const info = $("#lightInfo");
+    if (!canFS) { info.textContent = "Windows の Chrome か Edge で開いてください"; return; }
+    try { lightSrc = await showDirectoryPicker({ id: "lp-src", mode: "read" }); } catch (e) { return pickError(e, info); }
+    info.textContent = `写真フォルダ: ${lightSrc.name} ✓ 次に②を押してください`;
+    $("#lightGo").disabled = false;
+  };
+  $("#lightGo").onclick = async () => {
     const info = $("#lightInfo");
     const since = $("#lightSince").value || "2025-05";
-    let src, dst;
+    let dst;
+    try { dst = await showDirectoryPicker({ id: "lp-light", mode: "readwrite", startIn: "documents" }); } catch (e) { return pickError(e, info); }
+    $("#lightGo").disabled = true;
     try {
-      info.textContent = "まず元の写真フォルダを選んでください";
-      src = await showDirectoryPicker({ id: "lp-src", mode: "read" });
-      info.textContent = "次に作成先を選んでください（例: デスクトップ）";
-      dst = await showDirectoryPicker({ id: "lp-light", mode: "readwrite", startIn: "desktop" });
-    } catch { info.textContent = ""; return; }
-    const out = await dst.getDirectoryHandle("L版えらび_スマホ用", { create: true });
-    const all = [];
-    info.textContent = "写真を探しています…";
-    await walk(src, since, async (f) => { all.push(f); });
-    let made = 0, skipped = 0, heic = 0, old = 0;
-    const dirs = {};
-    for (const f of all) {
-      if (!DECODABLE.test(f.name)) { heic++; continue; }
-      try {
-        const file = await f.h.getFile();
-        f.dt = await LP.exifDate(file).catch(() => null);
-        const month = f.dirMonth || LP.monthFromDt(f.dt) || LP.monthFromText(f.name) || LP.monthFromTime(file.lastModified);
-        if (month < since) { old++; continue; }
-        const d = (dirs[month] ||= await out.getDirectoryHandle(month, { create: true }));
-        const name = f.name.replace(/\.[^.]+$/, "") + ".jpg";
-        try { await d.getFileHandle(name); skipped++; continue; } catch {} // 作成済み
-        const img = await LP.decode(file);
-        let blob = await LP.resize(img, { long: 2048, q: 0.85 });
-        if (img.close) img.close();
-        blob = await LP.withExifDate(blob, f.dt || `${month.replace("-", ":")}:01 12:00:00`);
-        const w = await (await d.getFileHandle(name, { create: true })).createWritable();
-        await w.write(blob);
-        await w.close();
-        made++;
-      } catch (e) {
-        console.warn(f.path, e);
+      const out = await dst.getDirectoryHandle("L版えらび_スマホ用", { create: true });
+      const all = [];
+      info.textContent = "写真を探しています…";
+      await walk(lightSrc, since, async (f) => {
+        all.push(f);
+        if (all.length % 200 === 0) info.textContent = `写真を探しています… ${all.length}枚`;
+      });
+      if (!all.length) { info.innerHTML = `⚠ ${since.replace("-", "年")}月以降の写真が見つかりませんでした。選んだフォルダ（${esc(lightSrc.name)}）が合っているか確認してください。`; return; }
+      let made = 0, skipped = 0, old = 0, failed = 0, done = 0;
+      const t0 = Date.now();
+      const dirs = {};
+      for (const f of all) {
+        try {
+          const file = await f.h.getFile();
+          f.dt = await LP.exifDate(file).catch(() => null);
+          const month = f.dirMonth || LP.monthFromDt(f.dt) || LP.monthFromText(f.name) || LP.monthFromTime(file.lastModified);
+          if (month < since) { old++; continue; }
+          const d = (dirs[month] ||= await out.getDirectoryHandle(month, { create: true }));
+          const name = f.name.replace(/\.[^.]+$/, "") + ".jpg";
+          let exists = false;
+          try { await d.getFileHandle(name); exists = true; } catch {}
+          if (exists) { skipped++; continue; } // 作成済み（途中から再開できる）
+          const img = await LP.decode(file);
+          let blob = await LP.resize(img, { long: 2048, q: 0.85 });
+          if (img.close) img.close();
+          blob = await LP.withExifDate(blob, f.dt || `${month.replace("-", ":")}:01 12:00:00`);
+          const w = await (await d.getFileHandle(name, { create: true })).createWritable();
+          await w.write(blob);
+          await w.close();
+          made++;
+        } catch (e) {
+          failed++;
+          console.warn(f.path, e);
+        } finally {
+          done++;
+          const left = (Date.now() - t0) / done * (all.length - done);
+          info.textContent = `作成中… ${done} / ${all.length}` + (done > 5 ? `（あと約${Math.max(1, Math.ceil(left / 60000))}分）` : "") + (failed ? ` ・ 失敗 ${failed}` : "");
+        }
       }
-      info.textContent = `作成中… ${made + skipped} / ${all.length - heic - old}`;
+      info.innerHTML = `<b>✓ ${made}枚</b> を <code>${esc(dst.name)}\\L版えらび_スマホ用</code> に作りました` +
+        (skipped ? `（作成済み ${skipped}枚はスキップ）` : "") + (failed ? `<br>⚠ 読めなかった写真 ${failed}枚` : "") +
+        `<br>このフォルダをスマホに移して、スマホの「写真を取り込む」で選んでください。`;
+    } catch (e) {
+      info.innerHTML = `⚠ 途中で止まりました: ${esc(e.message || e)}<br>もう一度②を押すと続きから作ります。`;
+    } finally {
+      $("#lightGo").disabled = false;
     }
-    info.innerHTML = `<b>✓ ${made}枚</b> を <code>${esc(dst.name)}\\L版えらび_スマホ用</code> に作りました` +
-      (skipped ? `（作成済み ${skipped}枚はスキップ）` : "") + (heic ? `<br>HEIC ${heic}枚は作れませんでした。` : "");
   };
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));

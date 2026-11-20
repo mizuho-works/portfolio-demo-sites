@@ -1,0 +1,2 @@
+heic2any 0.0.4 (MIT License) https://github.com/alexcorvi/heic2any
+libheif (LGPL-3.0) https://github.com/strukturag/libheif — bundled inside heic2any

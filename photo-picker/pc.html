@@ -20,6 +20,8 @@
     <h2><span>1</span>スマホから送ったリストを選ぶ</h2>
     <p>スマホの「リストを送る / 保存」で作った <code>L版リスト_….json</code> です。ここにドラッグしてもOK。</p>
     <label class="primary">リストを選ぶ<input id="listFile" type="file" accept=".json,application/json" hidden></label>
+    <p style="margin:14px 0 6px">または ☁ スプレッドシートに自動保存している場合は、同じURLを貼るだけ:</p>
+    <div class="urlrow"><input id="sheetUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec"><button id="sheetLoad" class="primary sm">スプシから読み込む</button></div>
     <div id="listInfo" class="info"></div>
   </section>
 
@@ -32,7 +34,7 @@
 
   <section class="step" id="s3">
     <h2><span>3</span>まとめ先を選んでコピー</h2>
-    <p>選んだ場所に <code>L版印刷_日時\年-月\</code> を作ってコピーします（元の写真は動かしません）。例: <code>D:\</code> やデスクトップ</p>
+    <p>選んだ場所に <code>L版印刷_日時\年-月\</code> を作ってコピーします（元の写真は動かしません）。新しく作ったフォルダ（例: <code>D:\L版印刷</code>）を選んでください。デスクトップやドライブ直下そのものは Chrome の制限で選べません。</p>
     <button id="pickDest" class="primary" disabled>まとめ先を選んでコピー</button>
     <div id="destInfo" class="info"></div>
   </section>
@@ -41,9 +43,12 @@
     <h2><span>＋</span>写真がPCにしか無いとき：スマホ用の軽い写真を作る</h2>
     <p>スマホに元の写真が残っていない場合は、ここで縮小コピー（1枚 約0.3MB）を作ってスマホに移し、スマホの「写真を取り込む」で選んでください。撮影日時を埋め込むので、月ごとに正しく分かれます。リストからPCの元写真を探すときも、ちゃんと元の写真が見つかります。</p>
     <label class="row">対象 <span><input id="lightSince" type="month" value="2025-05"> 以降</span></label>
-    <button id="mkLight" class="ghostbtn">写真フォルダ → 作成先 を選んで作る</button>
+    <div class="btns">
+      <button id="lightSrc" class="ghostbtn">① 写真フォルダを選ぶ</button>
+      <button id="lightGo" class="ghostbtn" disabled>② 作成先を選んで作る</button>
+    </div>
     <div id="lightInfo" class="info"></div>
-    <p class="note">iPhoneへは、作ったフォルダを iCloud Drive / Googleドライブ に入れて「ファイル」アプリから取り込むか、写真アプリに保存してください。HEIC形式の写真はPCのブラウザで読めないため、ここでは作れません（スマホにある元写真から取り込んでください）。</p>
+    <p class="note">iPhoneへは、作ったフォルダを iCloud Drive / Googleドライブ に入れて「ファイル」アプリから取り込むか、写真アプリに保存してください。作成先は、新しく作ったフォルダ（例: <code>D:\スマホ用</code>）を選んでください。デスクトップやドライブ直下そのものは Chrome の制限で選べません。途中で止まっても、もう一度②を押せば続きから作ります。HEIC（iPhone）の写真も変換できますが、1枚数秒かかります。</p>
   </section>
 </main>
 <div id="toast" class="toast" hidden></div>

@@ -36,6 +36,7 @@
     try {
       await idb.put("meta", p);
       flashSaved();
+      scheduleSync();
     } catch {
       p.sel = !on;
       paintSel(p);
@@ -103,6 +104,8 @@
     try { await wake?.release(); } catch {}
     prog.hidden = true;
     if (!curMonth && firstNewMonth[0]) curMonth = firstNewMonth[0];
+    await load();
+    await adoptOrphans();
     await refresh(true);
     toast(`${added}枚 取り込みました` + (dup ? `（取り込み済み ${dup}枚はスキップ）` : "") + (skippedOld ? `（期間外 ${skippedOld}枚は除外）` : "") + (failed ? ` ・ 読めない写真 ${failed}枚` : ""));
   }
@@ -474,7 +477,8 @@
   });
 
   function buildList() {
-    const items = photos.filter((p) => p.sel).map((p) => ({ name: p.name, dt: p.dt, month: p.month, w: p.w, h: p.h }));
+    const items = photos.filter((p) => p.sel).map((p) => ({ name: p.name, dt: p.dt, month: p.month, w: p.w, h: p.h }))
+      .concat(orphans.map((o) => ({ name: o.name, dt: o.dt || null, month: o.month })));
     return { app: "l-picker", version: 1, created: new Date().toISOString(), since, count: items.length, items };
   }
 
@@ -512,14 +516,8 @@
     if (!f) return;
     try {
       const list = JSON.parse(await f.text());
-      let hit = 0;
-      for (const it of list.items || []) {
-        const p = photos.find((x) => (it.dt && x.dt === it.dt && LP.stem(x.name) === LP.stem(it.name))) ||
-          photos.find((x) => it.dt && x.dt === it.dt) ||
-          photos.find((x) => !it.dt && LP.stem(x.name) === LP.stem(it.name) && x.month === it.month);
-        if (p && !p.sel) { p.sel = true; await idb.put("meta", p); }
-        if (p) hit++;
-      }
+      const { hit } = await applyList(list.items || []);
+      scheduleSync();
       renderChips(); renderGrid(); renderSummary();
       toast(`${hit} / ${(list.items || []).length}枚の ♥ を復元しました`);
     } catch {
@@ -531,8 +529,143 @@
     if (!confirm("取り込んだ写真と ♥ をすべて消します（元の写真は消えません）。よろしいですか？")) return;
     await idb.tx(["meta", "thumb", "prev", "kv"], "readwrite", (...s) => s.forEach((o) => o.clear()));
     dropUrls(() => false);
+    orphans = [];
+    if (sheetUrl) await idb.put("kv", sheetUrl, "sheetUrl");
     closeSheet();
     await refresh(true);
+  };
+
+  // ------------------------------------------------------------ 照合 (リスト/スプシ → ♥)
+  function findPhoto(it) {
+    const st = LP.stem(it.name);
+    return (it.dt && photos.find((x) => x.dt === it.dt && LP.stem(x.name) === st)) ||
+      (it.dt && photos.find((x) => x.dt === it.dt)) ||
+      (!it.dt && photos.find((x) => LP.stem(x.name) === st && x.month === it.month)) || null;
+  }
+  // items を ♥ にする。見つからない分は orphans として保持（あとで取り込んだら自動で ♥）
+  async function applyList(items) {
+    let hit = 0;
+    const miss = [];
+    for (const it of items) {
+      const p = findPhoto(it);
+      if (!p) { miss.push(it); continue; }
+      hit++;
+      if (!p.sel) { p.sel = true; p.selAt = Date.parse(it.at) || Date.now(); await idb.put("meta", p); }
+    }
+    const key = (it) => `${it.dt}|${it.name}`;
+    const known = new Set(orphans.map(key));
+    for (const it of miss) if (!known.has(key(it))) orphans.push(it);
+    await idb.put("kv", orphans, "orphans");
+    return { hit, miss: miss.length };
+  }
+  async function adoptOrphans() {
+    if (!orphans.length) return;
+    const rest = orphans;
+    orphans = [];
+    await applyList(rest);
+  }
+
+  // ------------------------------------------------------------ Googleスプレッドシートに自動保存
+  let sheetUrl = null, orphans = [], syncTimer, syncing = false, dirty = false;
+  function setCloud(state, msg) {
+    const el = $("#cloud");
+    el.hidden = !sheetUrl;
+    el.dataset.s = state;
+    el.textContent = { ok: "☁ スプシ保存済み", wait: "☁ 保存中…", err: "☁ 未保存・再試行します" }[state] || "";
+    const st = $("#sheetStatus");
+    if (st) st.textContent = msg || (sheetUrl ? el.textContent : "未接続");
+  }
+  function payload() {
+    const { m } = counts();
+    const items = photos.filter((p) => p.sel).map((p) => ({ month: p.month, name: p.name, dt: p.dt || "", at: new Date(p.selAt || p.at).toISOString() }));
+    for (const o of orphans) items.push({ month: o.month, name: o.name, dt: o.dt || "", at: o.at || "" });
+    items.sort((a, b) => (a.month + a.dt + a.name < b.month + b.dt + b.name ? -1 : 1));
+    return { items, months: months.map((mo) => ({ month: mo, sel: m[mo].sel, all: m[mo].all })) };
+  }
+  function scheduleSync(delay = 1500) {
+    if (!sheetUrl) return;
+    dirty = true;
+    setCloud("wait");
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(syncNow, delay);
+  }
+  async function syncNow() {
+    if (!sheetUrl || syncing) return;
+    syncing = true;
+    dirty = false;
+    try {
+      const r = await fetch(sheetUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload()) });
+      const j = await r.json();
+      if (!j.ok) throw new Error("ng");
+      if (!dirty) setCloud("ok");
+    } catch {
+      dirty = true;
+      setCloud("err");
+      clearTimeout(syncTimer);
+      syncTimer = setTimeout(syncNow, 15000);
+    } finally {
+      syncing = false;
+    }
+    if (dirty && $("#cloud").dataset.s !== "err") { clearTimeout(syncTimer); syncTimer = setTimeout(syncNow, 800); }
+  }
+  // 閉じる直前にも送る
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden" && dirty && sheetUrl) {
+      navigator.sendBeacon(sheetUrl, new Blob([JSON.stringify(payload())], { type: "text/plain;charset=utf-8" }));
+    }
+  });
+  window.addEventListener("online", () => { if (dirty) syncNow(); });
+
+  async function pullSheet(url) {
+    const r = await fetch(url, { cache: "no-store" });
+    const j = await r.json();
+    if (!j.ok) throw new Error("ng");
+    return j.items || [];
+  }
+  // このスマホに ♥ が無いのに、スプシにはある → 復元 (機種変更・データ消去のとき)
+  async function restoreFromSheetIfEmpty() {
+    if (!sheetUrl || photos.some((p) => p.sel) || orphans.length) return;
+    try {
+      const items = await pullSheet(sheetUrl);
+      if (!items.length) return;
+      const { hit, miss } = await applyList(items);
+      renderChips(); renderGrid();
+      toast(`スプシから ♥ を復元しました（${hit}枚` + (miss ? `、未取り込み ${miss}枚は取り込むと自動で♥` : "") + "）");
+    } catch {}
+  }
+
+  $("#sheetSave").onclick = async () => {
+    const url = $("#sheetUrl").value.trim();
+    if (!url) {
+      sheetUrl = null;
+      await idb.del("kv", "sheetUrl");
+      setCloud("", "未接続");
+      return;
+    }
+    if (!/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(url)) { setCloud("", "URLが違うようです（https://script.google.com/macros/s/…/exec）"); return; }
+    setCloud("", "接続テスト中…");
+    try {
+      const items = await pullSheet(url);
+      sheetUrl = url;
+      await idb.put("kv", url, "sheetUrl");
+      const local = photos.some((p) => p.sel);
+      if (!local && items.length) await restoreFromSheetIfEmpty();
+      else syncNow();
+      renderChips(); renderGrid();
+      toast("スプレッドシートに接続しました。以降は自動で保存されます");
+      setCloud("ok");
+    } catch {
+      setCloud("", "つながりませんでした。デプロイ時に「アクセスできるユーザー: 全員」になっているか確認してください");
+    }
+  };
+  $("#copyGs").onclick = async () => {
+    try {
+      const code = await (await fetch("sheet-sync.gs")).text();
+      await navigator.clipboard.writeText(code);
+      toast("コードをコピーしました。Apps Script に貼り付けてください");
+    } catch {
+      location.href = "sheet-sync.gs";
+    }
   };
 
   // ------------------------------------------------------------ misc
@@ -554,11 +687,15 @@
   (async () => {
     try {
       since = (await idb.get("kv", "since")) || since;
+      sheetUrl = (await idb.get("kv", "sheetUrl")) || null;
+      orphans = (await idb.get("kv", "orphans")) || [];
+      if (sheetUrl) { $("#sheetUrl").value = sheetUrl; setCloud("ok"); }
       $("#sinceLabel").textContent = `${+since.slice(0, 4)}年${+since.slice(5)}月`;
       curMonth = store.get("month", null);
       await refresh(true);
       scrollChipIntoView();
       await resumePosition();
+      await restoreFromSheetIfEmpty();
     } catch (e) {
       $("#empty").hidden = false;
       $("#empty").textContent = "このブラウザでは保存領域が使えません（プライベートブラウズをオフにしてください）";
