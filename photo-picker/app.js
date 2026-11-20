@@ -47,13 +47,38 @@
   // ------------------------------------------------------------ import
   let cancelImport = false;
   async function importFiles(fileList) {
-    const files = [...fileList];
-    if (!files.length) return;
+    waiting(false);
+    const picked = [...fileList];
+    if (!picked.length) return;
     if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
     cancelImport = false;
     const prog = $("#progress");
     prog.hidden = false;
-    let added = 0, skippedOld = 0, dup = 0, failed = 0;
+    let skippedOld = 0;
+    // ZIP（PCで作った月別パック）は中の写真に展開
+    const files = [];
+    let preSkipped = 0;
+    for (const f of picked) {
+      if (/\.zip$/i.test(f.name) || /zip/.test(f.type)) {
+        $("#pTitle").textContent = `ZIPを開いています… ${f.name}`;
+        try {
+          const hint = LP.monthFromText(f.name);
+          for (const ent of await LP.zipEntries(f)) {
+            if (/\.(jpe?g|png|webp|heic|heif)$/i.test(ent.name) && !ent.name.split("/").pop().startsWith("._")) files.push({ zip: f, ent, hint });
+          }
+        } catch (e) { toast(`${f.name}: ${e.message}`); }
+      } else {
+        if (!/\.(jpe?g|png|webp|heic|heif)$/i.test(f.name) && !/^image\//.test(f.type)) continue; // 動画など
+        // PCのフォルダごと取り込み: フォルダ名（202505 など）の年月を優先、対象外の月は開かずに飛ばす
+        const rp = f.webkitRelativePath || "";
+        const dm = rp.includes("/") ? LP.monthFromText(rp.slice(0, rp.lastIndexOf("/"))) : null;
+        if (dm && dm < since) { preSkipped++; continue; }
+        files.push(dm ? { file: f, dirHint: dm } : f);
+      }
+    }
+    skippedOld += preSkipped;
+    if (!files.length) { prog.hidden = true; toast(preSkipped ? `${since.replace("-", "年")}月以降の写真がありませんでした` : "写真が見つかりませんでした"); return; }
+    let added = 0, dup = 0, failed = 0;
     const firstNewMonth = [];
     const upd = (i) => {
       $("#pFill").style.width = `${(i / files.length) * 100}%`;
@@ -68,8 +93,11 @@
     let next = 0, done = 0;
     const one = async (f) => {
       try {
+        const hint = f.hint, dirHint = f.dirHint;
+        if (f.zip) f = await LP.zipFile(f.zip, f.ent);
+        else if (f.file) f = f.file;
         const dt = await LP.exifDate(f).catch(() => null);
-        const month = LP.monthFromDt(dt) || LP.monthFromText(f.name) || LP.monthFromTime(f.lastModified);
+        const month = dirHint || LP.monthFromDt(dt) || LP.monthFromText(f.name) || hint || LP.monthFromTime(f.lastModified);
         if (month < since) { skippedOld++; return; }
         const id = dt ? `${dt}|${LP.stem(f.name)}` : `${LP.stem(f.name)}|${f.size}`;
         if (byId.has(id)) { dup++; return; }
@@ -109,10 +137,31 @@
     await refresh(true);
     toast(`${added}枚 取り込みました` + (dup ? `（取り込み済み ${dup}枚はスキップ）` : "") + (skippedOld ? `（期間外 ${skippedOld}枚は除外）` : "") + (failed ? ` ・ 読めない写真 ${failed}枚` : ""));
   }
-  $("#pCancel").onclick = () => { cancelImport = true; };
-  for (const id of ["#pick", "#pick2"]) {
-    $(id).addEventListener("change", async (e) => { await importFiles(e.target.files); e.target.value = ""; });
+  $("#pCancel").onclick = () => { cancelImport = true; if ($("#pTitle").dataset.wait) { pickAt = 0; waiting(false); } };
+  // 写真選択画面から戻ってきたのに写真がまだ届かない＝iPhoneが準備中
+  let pickAt = 0, waitTimer;
+  function waiting(on) {
+    clearTimeout(waitTimer);
+    if (!on) { if ($("#pTitle").dataset.wait) { $("#progress").hidden = true; delete $("#pTitle").dataset.wait; } return; }
+    $("#pTitle").dataset.wait = "1";
+    $("#pTitle").textContent = "写真を受け取っています…";
+    $("#pText").textContent = "スマホが写真を準備しています。たくさん選ぶと数分かかることがあります（数千枚以上だと固まることがあるので、1回 1,000枚くらいまでがおすすめ）。";
+    $("#pFill").style.width = "0";
+    $("#progress").hidden = false;
   }
+  for (const id of ["#pick", "#pick2", "#pickZip", "#pickZip2", "#pickDir", "#pickDir2"]) {
+    const el = $(id);
+    if (!el) continue;
+    el.addEventListener("click", () => { pickAt = Date.now(); });
+    el.addEventListener("cancel", () => { pickAt = 0; waiting(false); });
+    el.addEventListener("change", async (e) => { pickAt = 0; await importFiles(e.target.files); e.target.value = ""; });
+  }
+  const backFromPicker = () => {
+    if (!pickAt || Date.now() - pickAt < 800) return;
+    waitTimer = setTimeout(() => { if (pickAt) waiting(true); }, 700);
+  };
+  window.addEventListener("focus", backFromPicker);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") backFromPicker(); });
 
   async function refresh(full) {
     await load();

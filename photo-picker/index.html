@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261120c">
+<link rel="stylesheet" href="style.css?v=20261120d">
 </head>
 <body>
 <header class="top">
@@ -47,9 +47,11 @@
     <li><b>PCでフォルダにまとめる</b><br>選んだ写真のリストをPCに送り、PCで同じページを開いて元の写真をフォルダにコピーします。</li>
   </ol>
   <label class="primary big">写真を取り込む<input id="pick2" type="file" accept="image/*" multiple hidden></label>
+  <label class="ghost zipbtn pconly">💻 PCで開いている場合：フォルダごと取り込む<input id="pickDir2" type="file" webkitdirectory multiple hidden></label>
+  <label class="ghost zipbtn">PCで作った月別ZIPから取り込む<input id="pickZip2" type="file" accept=".zip,application/zip" multiple hidden></label>
   <p class="note">写真はこのスマホの中だけで処理し、どこにも送信しません。<br>
-    <b>まとめて選ぶコツ</b>：iPhoneは選択画面で1枚目を押さえたまま指を下へなぞると、何百枚でも一気に選べます。Androidは写真を長押し→なぞる。多いときは数か月ずつ取り込むと安定します。</p>
-  <p class="note">写真がPCにしか無いときは → <a href="pc.html#light">PCで「スマホ用の軽い写真」を作る</a></p>
+    <b>まとめて選ぶコツ</b>：選択画面で1枚目を押さえたまま指を下へなぞると一気に選べます。<b>1回 1,000枚（1〜2か月分）くらいまで</b>にしてください。何千枚も一度に選ぶと、スマホの準備で固まることがあります。取り込み済みの写真は自動で飛ばすので、何回に分けてもOKです。</p>
+  <p class="note">写真がPCにしか無いときは → このページを<b>PCのChrome / Edge</b>で開いて「フォルダごと取り込む」で <code>E:\03_年月別バックアップ</code> を選べば、PCでそのまま選べます。</p>
 </section>
 
 <main id="grid" class="grid"></main>
@@ -130,6 +132,10 @@
 
     <details class="more">
       <summary>設定・バックアップ</summary>
+      <label class="row">PCのフォルダごと取り込む（PC向け）
+        <span class="filebtn">フォルダを選ぶ<input id="pickDir" type="file" webkitdirectory multiple hidden></span></label>
+      <label class="row">PCで作った月別ZIPから取り込む
+        <span class="filebtn">ZIPを選ぶ<input id="pickZip" type="file" accept=".zip,application/zip" multiple hidden></span></label>
       <label class="row">対象の期間
         <span><input id="since" type="month" value="2025-05"> 以降</span></label>
       <label class="row">リストから ♥ を復元
@@ -142,7 +148,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261120c"></script>
-<script src="app.js?v=20261120c"></script>
+<script src="lib.js?v=20261120d"></script>
+<script src="app.js?v=20261120d"></script>
 </body>
 </html>

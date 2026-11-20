@@ -171,7 +171,87 @@ const LP = (() => {
     return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`;
   };
 
-  return { isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
+  // ---------------------------------------------------------- ZIP（無圧縮で書く / 読む）
+  const CRC_T = (() => {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+    return t;
+  })();
+  function crc32(u8) {
+    let c = 0xffffffff;
+    for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+  class ZipWriter {
+    constructor(write) { this.write = write; this.off = 0; this.cd = []; this.names = new Set(); }
+    async add(name, blob) {
+      let nmStr = name, n = 2;
+      while (this.names.has(nmStr.toLowerCase())) nmStr = name.replace(/(\.[^.]+)?$/, `_${n++}$1`);
+      this.names.add(nmStr.toLowerCase());
+      const data = new Uint8Array(await blob.arrayBuffer());
+      const crc = crc32(data), nm = new TextEncoder().encode(nmStr);
+      const d = new Date(), t = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+      const dd = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+      const h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
+      h.setUint16(10, t, true); h.setUint16(12, dd, true); h.setUint32(14, crc, true);
+      h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, nm.length, true);
+      await this.write(new Uint8Array(h.buffer)); await this.write(nm); await this.write(data);
+      this.cd.push({ nm, crc, size: data.length, off: this.off, t, dd });
+      this.off += 30 + nm.length + data.length;
+    }
+    async finish() {
+      let size = 0;
+      for (const e of this.cd) {
+        const c = new DataView(new ArrayBuffer(46));
+        c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+        c.setUint16(12, e.t, true); c.setUint16(14, e.dd, true); c.setUint32(16, e.crc, true);
+        c.setUint32(20, e.size, true); c.setUint32(24, e.size, true); c.setUint16(28, e.nm.length, true); c.setUint32(42, e.off, true);
+        await this.write(new Uint8Array(c.buffer)); await this.write(e.nm);
+        size += 46 + e.nm.length;
+      }
+      const z = new DataView(new ArrayBuffer(22));
+      z.setUint32(0, 0x06054b50, true); z.setUint16(8, this.cd.length, true); z.setUint16(10, this.cd.length, true);
+      z.setUint32(12, size, true); z.setUint32(16, this.off, true);
+      await this.write(new Uint8Array(z.buffer));
+    }
+  }
+  async function zipComplete(file) {
+    if (file.size < 22) return false;
+    const dv = new DataView(await file.slice(file.size - 22).arrayBuffer());
+    return dv.getUint32(0, true) === 0x06054b50;
+  }
+  async function zipEntries(file) {
+    const tailLen = Math.min(file.size, 65557);
+    const tail = new DataView(await file.slice(file.size - tailLen).arrayBuffer());
+    let e = -1;
+    for (let i = tailLen - 22; i >= 0; i--) if (tail.getUint32(i, true) === 0x06054b50) { e = i; break; }
+    if (e < 0) throw new Error("ZIPファイルではないようです");
+    const n = tail.getUint16(e + 10, true), cdSize = tail.getUint32(e + 12, true), cdOff = tail.getUint32(e + 16, true);
+    const cd = new DataView(await file.slice(cdOff, cdOff + cdSize).arrayBuffer());
+    const dec = new TextDecoder(), out = [];
+    let p = 0;
+    for (let i = 0; i < n && p + 46 <= cd.byteLength; i++) {
+      if (cd.getUint32(p, true) !== 0x02014b50) break;
+      const method = cd.getUint16(p + 10, true), csize = cd.getUint32(p + 20, true);
+      const nl = cd.getUint16(p + 28, true), xl = cd.getUint16(p + 30, true), cl = cd.getUint16(p + 32, true), off = cd.getUint32(p + 42, true);
+      const name = dec.decode(new Uint8Array(cd.buffer, p + 46, nl));
+      p += 46 + nl + xl + cl;
+      if (!name.endsWith("/")) out.push({ name, method, csize, off });
+    }
+    return out;
+  }
+  async function zipFile(zip, ent) {
+    const lh = new DataView(await zip.slice(ent.off, ent.off + 30).arrayBuffer());
+    const start = ent.off + 30 + lh.getUint16(26, true) + lh.getUint16(28, true);
+    let blob = zip.slice(start, start + ent.csize);
+    if (ent.method === 8) blob = await new Response(blob.stream().pipeThrough(new DecompressionStream("deflate-raw"))).blob();
+    else if (ent.method !== 0) throw new Error("この圧縮形式は読めません");
+    const base = ent.name.split("/").pop();
+    return new File([blob], base, { type: /\.png$/i.test(base) ? "image/png" : /\.hei[cf]$/i.test(base) ? "image/heic" : "image/jpeg", lastModified: zip.lastModified });
+  }
+
+  return { ZipWriter, zipComplete, zipEntries, zipFile, isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
 })();
 
 // 予期しないエラーを画面に出す（黙って止まらないように）
@@ -197,7 +277,7 @@ const LP = (() => {
 
 // 新しい版が出ていたら自動で読み込み直す（ブラウザに古いページが残っても大丈夫なように）
 (() => {
-  const CUR = "20261120c";
+  const CUR = "20261120d";
   fetch("version.json?t=" + Date.now(), { cache: "no-store" })
     .then((r) => r.json())
     .then(({ v }) => {

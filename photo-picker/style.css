@@ -265,3 +265,9 @@ body.pc { background: var(--bg); }
 .sheetbox summary { cursor: pointer; font-size: 13px; margin-top: 10px; }
 .btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .ghostbtn:disabled { opacity: .4; }
+.zipbtn { display: block; text-align: center; cursor: pointer; margin: -6px 0 16px; padding: 12px; }
+.part { font-size: 18px; margin: 28px 0 10px; }
+.part small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+.alt { display: block; margin-top: 10px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.alt u { color: var(--ink); }
+@media (hover: none) and (pointer: coarse) { .pconly { display: none; } }
