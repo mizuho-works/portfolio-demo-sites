@@ -173,3 +173,24 @@ const LP = (() => {
 
   return { isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
 })();
+
+// 予期しないエラーを画面に出す（黙って止まらないように）
+(() => {
+  const show = (msg) => {
+    let el = document.getElementById("errbar");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "errbar";
+      el.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#8a1f17;color:#fff;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5";
+      el.onclick = () => el.remove();
+      document.body.appendChild(el);
+    }
+    el.textContent = "⚠ エラー: " + msg + "（タップで閉じる。この文面を教えてもらえれば直します）";
+  };
+  window.addEventListener("error", (e) => show(e.message || String(e.error)));
+  window.addEventListener("unhandledrejection", (e) => {
+    const r = e.reason;
+    if (r && r.name === "AbortError") return;
+    show((r && (r.message || r.name)) || String(r));
+  });
+})();

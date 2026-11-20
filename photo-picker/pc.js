@@ -93,7 +93,8 @@
     await walk(dir, since, async (f) => {
       files.push(f);
       if (files.length % 200 === 0) info.textContent = `写真を探しています… ${files.length}枚`;
-    });
+    }, dir.name);
+    if (!files.length) { info.innerHTML = `⚠ 「${esc(dir.name)}」の中に ${since.replace("-", "年")}月以降の写真が見つかりませんでした。フォルダを確認してください。`; return; }
     info.textContent = `${files.length}枚の中から照合しています…`;
 
     const byStem = new Map();
@@ -181,12 +182,30 @@
     if (e && e.name === "AbortError") return; // キャンセル
     el.innerHTML = `⚠ フォルダを開けませんでした（${esc(e && e.message || e)}）<br>${DENIED}`;
   }
-  let lightSrc = null;
+  let lightSrc = null, lightFiles = null;
   $("#lightSrc").onclick = async () => {
     const info = $("#lightInfo");
     if (!canFS) { info.textContent = "Windows の Chrome か Edge で開いてください"; return; }
     try { lightSrc = await showDirectoryPicker({ id: "lp-src", mode: "read" }); } catch (e) { return pickError(e, info); }
-    info.textContent = `写真フォルダ: ${lightSrc.name} ✓ 次に②を押してください`;
+    const since = $("#lightSince").value || "2025-05";
+    lightFiles = [];
+    info.textContent = `「${lightSrc.name}」の写真を数えています…`;
+    try {
+      await walk(lightSrc, since, async (f) => {
+        lightFiles.push(f);
+        if (lightFiles.length % 100 === 0) info.textContent = `「${lightSrc.name}」の写真を数えています… ${lightFiles.length}枚`;
+      }, lightSrc.name);
+    } catch (e) {
+      info.innerHTML = `⚠ フォルダを読めませんでした: ${esc(e.message || e)}`;
+      return;
+    }
+    if (!lightFiles.length) {
+      info.innerHTML = `⚠ 「${esc(lightSrc.name)}」の中に写真（JPG / HEIC / PNG）が見つかりませんでした。`;
+      return;
+    }
+    const heic = lightFiles.filter((f) => /\.hei[cf]$/i.test(f.name)).length;
+    info.innerHTML = `✓ 「${esc(lightSrc.name)}」で写真 <b>${lightFiles.length}枚</b> 見つかりました` + (heic ? `（うちHEIC ${heic}枚・少し時間がかかります）` : "") +
+      `<br>次に <b>②作成先を選んで作る</b> を押してください。`;
     $("#lightGo").disabled = false;
   };
   $("#lightGo").onclick = async () => {
@@ -197,12 +216,7 @@
     $("#lightGo").disabled = true;
     try {
       const out = await dst.getDirectoryHandle("L版えらび_スマホ用", { create: true });
-      const all = [];
-      info.textContent = "写真を探しています…";
-      await walk(lightSrc, since, async (f) => {
-        all.push(f);
-        if (all.length % 200 === 0) info.textContent = `写真を探しています… ${all.length}枚`;
-      });
+      const all = lightFiles || [];
       if (!all.length) { info.innerHTML = `⚠ ${since.replace("-", "年")}月以降の写真が見つかりませんでした。選んだフォルダ（${esc(lightSrc.name)}）が合っているか確認してください。`; return; }
       let made = 0, skipped = 0, old = 0, failed = 0, done = 0;
       const t0 = Date.now();
