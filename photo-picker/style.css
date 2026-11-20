@@ -253,3 +253,4 @@ body.pc { background: var(--bg); }
 .info { margin-top: 12px; font-size: 14px; line-height: 1.7; }
 .info ul { max-height: 200px; overflow: auto; padding-left: 20px; margin: 6px 0; font-size: 13px; }
 .info small { color: var(--muted); }
+.ptip { font-size: 11px !important; min-height: 0 !important; }

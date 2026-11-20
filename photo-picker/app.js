@@ -60,19 +60,24 @@
       $("#pText").textContent = `追加 ${added}枚` + (skippedOld ? ` ・ ${since.replace("-", "年")}月より前 ${skippedOld}枚は除外` : "") + (dup ? ` ・ 取り込み済み ${dup}枚` : "") + (failed ? ` ・ 読めない ${failed}枚` : "");
     };
     upd(0);
-    for (let i = 0; i < files.length && !cancelImport; i++) {
-      const f = files[i];
+    // 画面が消えると止まるので、取り込み中はスリープさせない
+    let wake = null;
+    try { wake = await navigator.wakeLock?.request("screen"); } catch {}
+    const t0 = Date.now();
+    let next = 0, done = 0;
+    const one = async (f) => {
       try {
         const dt = await LP.exifDate(f).catch(() => null);
         const month = LP.monthFromDt(dt) || LP.monthFromText(f.name) || LP.monthFromTime(f.lastModified);
-        if (month < since) { skippedOld++; upd(i + 1); continue; }
+        if (month < since) { skippedOld++; return; }
         const id = dt ? `${dt}|${LP.stem(f.name)}` : `${LP.stem(f.name)}|${f.size}`;
-        if (byId.has(id)) { dup++; upd(i + 1); continue; }
+        if (byId.has(id)) { dup++; return; }
+        byId.set(id, null); // 同時処理での重複防止
         const img = await LP.decode(f);
         const [w, h] = LP.dims(img);
-        const thumb = await LP.resize(img, { short: 300, q: 0.72 });
         const prev = await LP.resize(img, { long: 1600, q: 0.82 });
         if (img.close) img.close();
+        const thumb = await LP.resize(await LP.decode(prev), { short: 300, q: 0.72 }); // 縮小版から作ると速い
         const meta = { id, name: f.name, dt, month, w, h, size: f.size, sel: false, at: Date.now() };
         await idb.tx(["meta", "thumb", "prev"], "readwrite", (m, t, pv) => { m.put(meta); t.put(thumb, id); pv.put(prev, id); });
         byId.set(id, meta);
@@ -83,13 +88,23 @@
         failed++;
         console.warn(f.name, e);
       }
-      upd(i + 1);
-      if (i % 25 === 24) await refresh(false);
-    }
+    };
+    const worker = async () => {
+      while (!cancelImport && next < files.length) {
+        await one(files[next++]);
+        done++;
+        upd(done);
+        const left = (Date.now() - t0) / done * (files.length - done);
+        if (done > 5 && left > 60000) $("#pTitle").textContent += `（あと約${Math.ceil(left / 60000)}分）`;
+        if (done % 40 === 0) await refresh(false);
+      }
+    };
+    await Promise.all([worker(), worker()]);
+    try { await wake?.release(); } catch {}
     prog.hidden = true;
     if (!curMonth && firstNewMonth[0]) curMonth = firstNewMonth[0];
     await refresh(true);
-    toast(`${added}枚 取り込みました` + (skippedOld ? `（期間外 ${skippedOld}枚は除外）` : "") + (failed ? ` ・ 読めない写真 ${failed}枚` : ""));
+    toast(`${added}枚 取り込みました` + (dup ? `（取り込み済み ${dup}枚はスキップ）` : "") + (skippedOld ? `（期間外 ${skippedOld}枚は除外）` : "") + (failed ? ` ・ 読めない写真 ${failed}枚` : ""));
   }
   $("#pCancel").onclick = () => { cancelImport = true; };
   for (const id of ["#pick", "#pick2"]) {
