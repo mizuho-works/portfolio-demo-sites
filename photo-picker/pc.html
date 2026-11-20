@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L版えらび PC</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="pc">
+<main class="pcwrap">
+  <header class="pchead">
+    <h1>L版えらび <small>PCでまとめる</small></h1>
+    <a href="./" class="ghost-link">スマホ用の画面へ</a>
+  </header>
+
+  <p id="unsupported" class="warn" hidden>このブラウザはPCのフォルダを読み書きできません。<b>Windows の Chrome か Edge</b> で開いてください。</p>
+
+  <section class="step" id="s1">
+    <h2><span>1</span>スマホから送ったリストを選ぶ</h2>
+    <p>スマホの「リストを送る / 保存」で作った <code>L版リスト_….json</code> です。ここにドラッグしてもOK。</p>
+    <label class="primary">リストを選ぶ<input id="listFile" type="file" accept=".json,application/json" hidden></label>
+    <div id="listInfo" class="info"></div>
+  </section>
+
+  <section class="step" id="s2">
+    <h2><span>2</span>元の写真フォルダを選ぶ</h2>
+    <p><code>D:\03_年月別バックアップ</code> を選んでください（「ファイルを表示」の確認が出たら「表示」）。中の月別フォルダも自動で探します。</p>
+    <button id="pickSrc" class="primary" disabled>写真フォルダを選ぶ</button>
+    <div id="srcInfo" class="info"></div>
+  </section>
+
+  <section class="step" id="s3">
+    <h2><span>3</span>まとめ先を選んでコピー</h2>
+    <p>選んだ場所に <code>L版印刷_日時\年-月\</code> を作ってコピーします（元の写真は動かしません）。例: <code>D:\</code> やデスクトップ</p>
+    <button id="pickDest" class="primary" disabled>まとめ先を選んでコピー</button>
+    <div id="destInfo" class="info"></div>
+  </section>
+
+  <section class="step light" id="light">
+    <h2><span>＋</span>写真がPCにしか無いとき：スマホ用の軽い写真を作る</h2>
+    <p>スマホに元の写真が残っていない場合は、ここで縮小コピー（1枚 約0.3MB）を作ってスマホに移し、スマホの「写真を取り込む」で選んでください。撮影日時を埋め込むので、月ごとに正しく分かれます。リストからPCの元写真を探すときも、ちゃんと元の写真が見つかります。</p>
+    <label class="row">対象 <span><input id="lightSince" type="month" value="2025-05"> 以降</span></label>
+    <button id="mkLight" class="ghostbtn">写真フォルダ → 作成先 を選んで作る</button>
+    <div id="lightInfo" class="info"></div>
+    <p class="note">iPhoneへは、作ったフォルダを iCloud Drive / Googleドライブ に入れて「ファイル」アプリから取り込むか、写真アプリに保存してください。HEIC形式の写真はPCのブラウザで読めないため、ここでは作れません（スマホにある元写真から取り込んでください）。</p>
+  </section>
+</main>
+<div id="toast" class="toast" hidden></div>
+<script src="lib.js"></script>
+<script src="pc.js"></script>
+</body>
+</html>
