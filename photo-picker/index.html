@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261121e">
+<link rel="stylesheet" href="style.css?v=20261121f">
 </head>
 <body>
 <header class="top">
@@ -147,6 +147,14 @@
   </div>
 </div>
 
+<div id="tabGone" class="progress" hidden>
+  <div class="pcard">
+    <b>別のタブでこのアプリが開かれました</b>
+    <small style="min-height:0">♥ が食い違わないように、このタブは止めました。このタブは閉じて、新しく開いたほうを使ってください。</small>
+    <button class="ghost" onclick="location.reload()">このタブで続ける（読み込み直す）</button>
+  </div>
+</div>
+
 <!-- 保存領域のトラブル -->
 <div id="storageHelp" class="progress" hidden>
   <div class="pcard">
@@ -165,7 +173,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261121e"></script>
-<script src="app.js?v=20261121e"></script>
+<script src="lib.js?v=20261121f"></script>
+<script src="app.js?v=20261121f"></script>
 </body>
 </html>

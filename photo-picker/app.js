@@ -34,6 +34,7 @@
   }
 
   async function setSel(p, on) {
+    if (inactive) return;
     if (p.sel === on) return;
     p.sel = on;
     p.selAt = Date.now();
@@ -845,6 +846,20 @@
   }
 
   $("#iosTip").hidden = !isIOSChrome;
+  // 同じアプリを複数のタブで開くと、古いタブが古い ♥ でスプシを書き換えてしまう → 最後に開いたタブだけ動かす
+  let inactive = false;
+  try {
+    const bc = new BroadcastChannel("l-picker");
+    const me = Math.random().toString(36).slice(2);
+    bc.postMessage({ hello: me });
+    bc.onmessage = (e) => {
+      if (!e.data || !e.data.hello || e.data.hello === me) return;
+      inactive = true;
+      sheetUrl = null; // このタブからはもう保存しない
+      clearTimeout(syncTimer);
+      $("#tabGone").hidden = false;
+    };
+  } catch {}
   (async () => {
     try {
       since = (await idb.get("kv", "since")) || since;
