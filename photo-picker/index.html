@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261121j">
+<link rel="stylesheet" href="style.css?v=20261121k">
 </head>
 <body>
 <header class="top">
@@ -35,6 +35,7 @@
     <button data-f="sel">♥ 選んだ</button>
     <button data-f="unsel">未選択</button>
     <button data-f="was">前に♥</button>
+    <button data-f="noface" hidden>顔なし</button>
     <span id="monthInfo" class="minfo"></span>
   </div>
 </header>
@@ -155,6 +156,19 @@
         <span class="filebtn">ファイルを選ぶ<input id="restore" type="file" accept=".json,application/json" hidden></span></label>
       <p class="note" id="storageInfo"></p>
       <div class="prunebox">
+        <b>顔が写っていない写真をまとめて消す</b>
+        <p class="note">♥ が付いていない写真の中から、顔が写っていない写真（風景・物・後ろ姿など）を探します。判定はスマホの中だけで行い、写真はどこにも送りません。1枚0.1秒ほどかかります。</p>
+        <label class="row">この月から <span><input id="faceFrom" type="month" value="2026-03"></span></label>
+        <label class="row">この月まで <span><input id="faceTo" type="month"></span></label>
+        <p id="faceInfo" class="note"></p>
+        <button id="btnFaceScan" class="primary">顔が写っていない写真を探す</button>
+        <div id="faceAfter" hidden>
+          <p class="note" style="margin-top:10px">顔なしと判定：<b id="faceNoCount">0</b>枚。後ろ姿や小さく写った顔は「顔なし」になることがあります。</p>
+          <button id="btnFaceReview" class="ghost">確認する（「顔なし」で一覧表示・残したい写真に ♥）</button>
+          <button id="btnFacePrune" class="primary">顔なしの写真を全部消す</button>
+        </div>
+      </div>
+      <div class="prunebox">
         <b>決め終わった月の容量を空ける</b>
         <p class="note">選んだ月までの、<b>♥ が付いていない写真</b>の取り込みデータを消します。♥ の写真は残り、元の写真（iPhone・PC）は消えません。</p>
         <label class="row">この月まで決め終わった <span><input id="pruneUntil" type="month"></span></label>
@@ -192,7 +206,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261121j"></script>
-<script src="app.js?v=20261121j"></script>
+<script src="lib.js?v=20261121k"></script>
+<script src="app.js?v=20261121k"></script>
 </body>
 </html>

@@ -290,8 +290,9 @@
   const lostByBug = (p) => !p.pruned && !p.sel && !!p.selAt && !p.userOff && p.synced === true;
   const lostUnknown = (p) => !p.pruned && !p.sel && !!p.selAt && !p.userOff && p.synced === undefined;
   const wasSel = (p) => lostByBug(p) || lostUnknown(p);
+  const noFace = (p) => !p.sel && !p.pruned && p.faceChecked && !p.faces;
   function listFor(month, f) {
-    return photos.filter((p) => p.month === month && !(p.pruned && !p.sel) && (f === "all" || (f === "sel" ? p.sel : f === "was" ? wasSel(p) : !p.sel)));
+    return photos.filter((p) => p.month === month && !(p.pruned && !p.sel) && (f === "all" || (f === "sel" ? p.sel : f === "was" ? wasSel(p) : f === "noface" ? noFace(p) : !p.sel)));
   }
 
   function renderGrid() {
@@ -316,7 +317,7 @@
     if (!photos.some((p) => p.month === curMonth)) {
       empty.hidden = false;
       empty.textContent = `この月の写真は、この端末にはまだ取り込んでいません。` + (other ? `（他の端末で ♥ ${other}枚 選択済み）` : "");
-    } else if (!list.length) empty.textContent = filter === "sel" ? "この月はまだ選んでいません" : filter === "was" ? "この月は、外れた ♥ はありません" : "この月は全部選びました";
+    } else if (!list.length) empty.textContent = filter === "sel" ? "この月はまだ選んでいません" : filter === "was" ? "この月は、外れた ♥ はありません" : filter === "noface" ? "この月は、顔なしと判定された写真はありません" : "この月は全部選びました";
   }
 
   function paintSel(p) {
@@ -557,6 +558,7 @@
         <span class="n"><b>${c.sel}</b> / ${c.all || "–"}</span></li>`;
     }).join("");
     $("#since").value = since;
+    renderFaceBox();
     const bug = photos.filter(lostByBug), unk = photos.filter(lostUnknown);
     $("#restoreBox").hidden = !bug.length && !unk.length;
     const perText = (list) => {
@@ -640,6 +642,116 @@
     scheduleSync(300);
     toast(`${was.length}枚の ♥ を戻しました`);
   };
+  // ------------------------------------------------------------ 顔が写っていない写真を探す（スマホの中だけで判定）
+  let faceLib;
+  function loadFaceLib() {
+    return (faceLib ||= new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src = "vendor/face/face-api.js";
+      sc.onload = async () => {
+        try {
+          await faceapi.nets.tinyFaceDetector.loadFromUri("vendor/face");
+          res(faceapi);
+        } catch (e) { faceLib = null; rej(e); }
+      };
+      sc.onerror = () => { faceLib = null; rej(new Error("顔判定を読み込めませんでした")); };
+      document.head.appendChild(sc);
+    }));
+  }
+  const faceRange = () => [$("#faceFrom").value || "0000-00", $("#faceTo").value || "9999-99"];
+  const faceTargets = () => { const [a, b] = faceRange(); return photos.filter((p) => p.month >= a && p.month <= b && !p.sel && !p.pruned); };
+  function renderFaceBox() {
+    const [a, b] = faceRange();
+    const t = faceTargets(), todo = t.filter((p) => !p.faceChecked).length, nf = t.filter(noFace).length;
+    $("#faceInfo").textContent = `対象（♥ なし）${t.length}枚` + (t.length - todo ? ` ・ 判定済み ${t.length - todo}枚` : "") + (nf ? ` ・ 顔なし ${nf}枚` : "");
+    $("#faceAfter").hidden = !nf;
+    $("#faceNoCount").textContent = nf;
+    $("#btnFaceScan").textContent = todo && todo < t.length ? `続きを判定する（残り ${todo}枚）` : "顔が写っていない写真を探す";
+    document.querySelector('.filters [data-f="noface"]').hidden = !photos.some(noFace);
+  }
+  for (const id of ["#faceFrom", "#faceTo"]) $(id).addEventListener("change", renderFaceBox);
+  $("#btnFaceScan").onclick = async () => {
+    const todo = faceTargets().filter((p) => !p.faceChecked);
+    if (!todo.length) { renderFaceBox(); toast("判定する写真はありません"); return; }
+    const prog = $("#progress");
+    cancelImport = false;
+    prog.hidden = false;
+    $("#pTitle").textContent = "顔を判定する準備中…";
+    $("#pText").textContent = "判定はスマホの中だけで行い、写真はどこにも送りません。";
+    $("#pFill").style.width = "0";
+    let fa;
+    try { fa = await loadFaceLib(); } catch (e) { prog.hidden = true; toast(e.message); return; }
+    const opt = new fa.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.3 });
+    const cv = document.createElement("canvas");
+    const t0 = Date.now();
+    let done = 0, found = 0, pending = [];
+    const flush = async () => { const b = pending; pending = []; if (b.length) await idb.tx("meta", "readwrite", (m) => { for (const p of b) m.put(p); }); };
+    try {
+      for (const p of todo) {
+        if (cancelImport) break;
+        const v = await idb.get("prev", p.id);
+        if (v) {
+          const bmp = await createImageBitmap(v instanceof Blob ? v : new Blob([v], { type: "image/jpeg" }));
+          cv.width = bmp.width; cv.height = bmp.height;
+          cv.getContext("2d").drawImage(bmp, 0, 0);
+          if (bmp.close) bmp.close();
+          const r = await fa.detectAllFaces(cv, opt);
+          p.faces = r.length;
+          if (!r.length) found++;
+        } else p.faces = 1; // 画像が無いものは消さない側に倒す
+        p.faceChecked = true;
+        pending.push(p);
+        done++;
+        if (pending.length >= 50) await flush();
+        const left = (Date.now() - t0) / done * (todo.length - done);
+        $("#pTitle").textContent = `顔を判定中… ${done} / ${todo.length}`;
+        $("#pFill").style.width = `${(done / todo.length) * 100}%`;
+        $("#pText").textContent = `顔なし ${found}枚` + (done > 5 ? ` ・ あと約${Math.max(1, Math.ceil(left / 60000))}分` : "") + "（中止しても、判定した分は保存されます）";
+      }
+      await flush();
+    } catch (e) {
+      try { await flush(); } catch {}
+      if (e && e.name === "StorageStall") { prog.hidden = true; showStorageHelp("stall"); return; }
+      toast("途中で止まりました。もう一度押すと続きから判定します");
+    }
+    prog.hidden = true;
+    renderFaceBox();
+    toast(`判定しました。顔なし ${found}枚`);
+  };
+  $("#btnFaceReview").onclick = () => {
+    const first = faceTargets().find(noFace) || photos.find(noFace);
+    setFilter("noface");
+    closeSheet();
+    if (first) goMonth(first.month); else renderGrid();
+  };
+  $("#btnFacePrune").onclick = async () => {
+    const t = faceTargets().filter(noFace);
+    if (!t.length) return;
+    if (!confirm(`顔が写っていないと判定された ${t.length}枚の取り込みデータを消します。\n♥ の写真は消しません。元の写真（iPhone・PC）は消えません。\n（後ろ姿などで顔が見えない写真も含まれます。先に「確認する」で見て、残したい写真に ♥ を付けておくと安全です）`)) return;
+    const prog = $("#progress");
+    prog.hidden = false;
+    let done = 0;
+    try {
+      for (let i = 0; i < t.length; i += 150) {
+        const batch = t.slice(i, i + 150);
+        await idb.tx(["meta", "thumb", "prev"], "readwrite", (m, th, pv) => {
+          for (const p of batch) { p.pruned = true; m.put(p); th.delete(p.id); pv.delete(p.id); }
+        });
+        done += batch.length;
+        $("#pTitle").textContent = `消しています… ${done} / ${t.length}`;
+        $("#pFill").style.width = `${(done / t.length) * 100}%`;
+      }
+    } catch (e) {
+      prog.hidden = true;
+      if (e && e.name === "StorageStall") { showStorageHelp("stall"); return; }
+    }
+    prog.hidden = true;
+    dropUrls(() => false);
+    if (filter === "noface") setFilter("all");
+    renderChips(); renderGrid(); renderSummary();
+    toast(`顔なしの ${done}枚を消しました`);
+  };
+
   // ------------------------------------------------------------ 決め終わった月の容量を空ける
   function pruneTargets(until) {
     return photos.filter((p) => p.month <= until && !p.sel && !p.pruned);
@@ -969,6 +1081,7 @@
       $("#empty").textContent = "スマホに保存した写真を読み込み中…（枚数が多いと少しかかります）";
       $("#totalCount").textContent = "…";
       await refresh(true);
+      document.querySelector('.filters [data-f="noface"]').hidden = !photos.some(noFace);
       scrollChipIntoView();
       await resumePosition();
       if (sheetUrl) syncNow();
