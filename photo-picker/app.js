@@ -920,6 +920,10 @@
       if (sheetUrl) { $("#sheetUrl").value = sheetUrl; setCloud("ok"); }
       $("#sinceLabel").textContent = `${+since.slice(0, 4)}年${+since.slice(5)}月`;
       curMonth = store.get("month", null);
+      // 写真が多いと読み込みに時間がかかるので、読み込み中と分かるようにする
+      $("#empty").hidden = false;
+      $("#empty").textContent = "スマホに保存した写真を読み込み中…（枚数が多いと少しかかります）";
+      $("#totalCount").textContent = "…";
       await refresh(true);
       scrollChipIntoView();
       await resumePosition();
