@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261121c">
+<link rel="stylesheet" href="style.css?v=20261121d">
 </head>
 <body>
 <header class="top">
@@ -51,6 +51,7 @@
   <label class="ghost zipbtn">PCで作った月別ZIPから取り込む<input id="pickZip2" type="file" accept=".zip,application/zip" multiple hidden></label>
   <p class="note">写真はこのスマホの中だけで処理し、どこにも送信しません。<br>
     <b>まとめて選ぶコツ</b>：選択画面で1枚目を押さえたまま指を下へなぞると一気に選べます。<b>1回 1,000枚（1〜2か月分）くらいまで</b>にしてください。何千枚も一度に選ぶと、スマホの準備で固まることがあります。取り込み済みの写真は自動で飛ばすので、何回に分けてもOKです。</p>
+  <p class="note" id="iosTip" hidden><b>iPhoneの方は Safari で開くのがおすすめ</b>です（Chromeは保存できる量が少なく、たくさん取り込むと止まることがあります）。</p>
   <p class="note">写真がPCにしか無いときは → このページを<b>PCのChrome / Edge</b>で開いて「フォルダごと取り込む」で <code>E:\03_年月別バックアップ</code> を選べば、PCでそのまま選べます。</p>
 </section>
 
@@ -146,9 +147,25 @@
   </div>
 </div>
 
+<!-- 保存領域のトラブル -->
+<div id="storageHelp" class="progress" hidden>
+  <div class="pcard">
+    <b id="storageHelpTitle">スマホの保存領域が応答しません</b>
+    <small style="min-height:0">取り込んだ写真が多すぎて、このブラウザで使える保存容量の上限に達した可能性があります。<b>♥ はスプシに保存されていれば消えません。</b></small>
+    <div id="storageHelpIOS" class="note">
+      <b>iPhoneは Safari がおすすめです。</b>iPhoneのChromeは保存できる量が少なく、いっぱいになると止まってしまいます。<br>
+      ① Safariでこのページを開く → ② 右上の ♥ →「スプレッドシートに自動保存」に同じURLを貼る → ③ 写真を月ごとに取り込む（♥ は自動で戻ります）<br>
+      Chrome側は「設定 → プライバシー → 閲覧履歴データを削除 → Cookie、サイトデータ」で空けられます。
+    </div>
+    <div class="note">ページを開き直すと直ることもあります。取り込みは 1〜2か月分ずつ にしてください。</div>
+    <button class="ghost" onclick="location.reload()">ページを開き直す</button>
+    <button class="ghost" onclick="this.closest('.progress').hidden = true">閉じる</button>
+  </div>
+</div>
+
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261121c"></script>
-<script src="app.js?v=20261121c"></script>
+<script src="lib.js?v=20261121d"></script>
+<script src="app.js?v=20261121d"></script>
 </body>
 </html>

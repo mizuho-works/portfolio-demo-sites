@@ -149,12 +149,19 @@ const LP = (() => {
     await new Promise((res, rej) => { t.oncomplete = res; t.onerror = t.onabort = () => rej(t.error); });
     return out instanceof Promise ? out : out;
   }
+  // 保存領域が応答しないとき（iPhoneで容量がいっぱい等）に固まらないよう、時間制限つき
+  const STALL = 45000;
+  const guard = (p) => Promise.race([p, new Promise((_, rej) => setTimeout(() => {
+    const e = new Error("スマホの保存領域が応答しません");
+    e.name = "StorageStall";
+    rej(e);
+  }, STALL))]);
   const idb = {
-    all: async (s) => req((await db()).transaction(s).objectStore(s).getAll()),
-    get: async (s, k) => req((await db()).transaction(s).objectStore(s).get(k)),
-    put: (s, v, k) => tx(s, "readwrite", (o) => { o.put(v, k); }),
-    del: (s, k) => tx(s, "readwrite", (o) => { o.delete(k); }),
-    tx,
+    all: async (s) => guard((async () => req((await db()).transaction(s).objectStore(s).getAll()))()),
+    get: async (s, k) => guard((async () => req((await db()).transaction(s).objectStore(s).get(k)))()),
+    put: (s, v, k) => guard(tx(s, "readwrite", (o) => { o.put(v, k); })),
+    del: (s, k) => guard(tx(s, "readwrite", (o) => { o.delete(k); })),
+    tx: (...a) => guard(tx(...a)),
   };
 
   // ---------------------------------------------------------- misc
@@ -286,7 +293,7 @@ const LP = (() => {
 
 // 新しい版が出ていたら自動で読み込み直す（ブラウザに古いページが残っても大丈夫なように）
 (() => {
-  const CUR = "20261121c";
+  const CUR = "20261121d";
   fetch("version.json?t=" + Date.now(), { cache: "no-store" })
     .then((r) => r.json())
     .then(({ v }) => {

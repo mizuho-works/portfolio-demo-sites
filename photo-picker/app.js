@@ -53,7 +53,20 @@
   }
 
   // ------------------------------------------------------------ import
-  let cancelImport = false;
+  let cancelImport = false, storageStalled = false;
+  const isIOSChrome = /CriOS|FxiOS|EdgiOS/.test(navigator.userAgent);
+  async function storageNearlyFull() {
+    try {
+      const est = await navigator.storage?.estimate?.();
+      return !!(est && est.quota && est.usage / est.quota > 0.92);
+    } catch { return false; }
+  }
+  function showStorageHelp(kind) {
+    const box = $("#storageHelp");
+    box.hidden = false;
+    $("#storageHelpTitle").textContent = kind === "full" ? "スマホの保存領域がいっぱいです" : "スマホの保存領域が応答しません";
+    $("#storageHelpIOS").hidden = !isIOSChrome;
+  }
   async function importFiles(fileList) {
     waiting(false);
     const picked = [...fileList];
@@ -63,6 +76,8 @@
     const prog = $("#progress");
     prog.hidden = false;
     let skippedOld = 0;
+    storageStalled = false;
+    if (await storageNearlyFull()) { prog.hidden = true; showStorageHelp("full"); return; }
     // ZIP（PCで作った月別パック）は中の写真に展開
     const files = [];
     let preSkipped = 0;
@@ -113,17 +128,20 @@
         byId.set(id, null); // 同時処理での重複防止
         const img = await LP.decode(f);
         const [w, h] = LP.dims(img);
-        const prev = await LP.resize(img, { long: 1440, q: 0.8 }); // 容量節約（1万枚でも入るように）
+        // 容量節約: 拡大用 1080px・一覧用 240px（1枚あたり 約80KB。1万枚でも 約0.8GB）
+        const prev = await LP.resize(img, { long: 1080, q: 0.72 });
         if (img.close) img.close();
-        const thumb = await LP.resize(await LP.decode(prev), { short: 300, q: 0.72 }); // 縮小版から作ると速い
+        const thumb = await LP.resize(await LP.decode(prev), { short: 240, q: 0.65 });
         const meta = { id, name: f.name, dt, month, w, h, size: f.size, sel: false, at: Date.now() };
-        await idb.tx(["meta", "thumb", "prev"], "readwrite", (m, t, pv) => { m.put(meta); t.put(thumb, id); pv.put(prev, id); });
+        const tb = await thumb.arrayBuffer(), pb = await prev.arrayBuffer();
+        await idb.tx(["meta", "thumb", "prev"], "readwrite", (m, t, pv) => { m.put(meta); t.put(tb, id); pv.put(pb, id); });
         byId.set(id, meta);
         photos.push(meta);
         added++;
         if (!firstNewMonth.length) firstNewMonth.push(month);
       } catch (e) {
         failed++;
+        if (e && e.name === "StorageStall") storageStalled = true;
         console.warn(f.name, e);
       }
     };
@@ -133,6 +151,7 @@
         // 1枚で止まらないように時間制限（HEICの変換などで遅い場合も90秒で次へ）
         const slow = setTimeout(() => { $("#pText").textContent += "（時間がかかっている写真があります…）"; }, 15000);
         try { await LP.timeout(one(f), 90000); } catch { failed++; }
+        if (storageStalled) cancelImport = true;
         clearTimeout(slow);
         done++;
         upd(done);
@@ -144,6 +163,7 @@
     await Promise.all([worker(), worker()]);
     try { await wake?.release(); } catch {}
     prog.hidden = true;
+    if (storageStalled) { showStorageHelp("stall"); return; }
     if (!curMonth && firstNewMonth[0]) curMonth = firstNewMonth[0];
     await load();
     await adoptOrphans();
@@ -235,9 +255,9 @@
   async function thumbUrl(id, kind = "thumb") {
     const key = kind + ":" + id;
     if (urls.has(key)) return urls.get(key);
-    const blob = await idb.get(kind, id);
-    if (!blob) return "";
-    const u = URL.createObjectURL(blob);
+    const v = await idb.get(kind, id);
+    if (!v) return "";
+    const u = URL.createObjectURL(v instanceof Blob ? v : new Blob([v], { type: "image/jpeg" }));
     urls.set(key, u);
     return u;
   }
@@ -807,6 +827,7 @@
     savedTimer = setTimeout(() => (el.hidden = true), 1400);
   }
 
+  $("#iosTip").hidden = !isIOSChrome;
   (async () => {
     try {
       since = (await idb.get("kv", "since")) || since;
@@ -822,6 +843,7 @@
       await resumePosition();
       if (sheetUrl) syncNow();
     } catch (e) {
+      if (e && e.name === "StorageStall") { showStorageHelp("stall"); return; }
       $("#empty").hidden = false;
       $("#empty").textContent = "このブラウザでは保存領域が使えません（プライベートブラウズをオフにしてください）";
     }
