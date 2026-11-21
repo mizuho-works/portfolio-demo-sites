@@ -271,3 +271,6 @@ body.pc { background: var(--bg); }
 .alt { display: block; margin-top: 10px; font-size: 13px; color: var(--muted); cursor: pointer; }
 .alt u { color: var(--ink); }
 @media (hover: none) and (pointer: coarse) { .pconly { display: none; } }
+.restorebox { border: 2px solid var(--accent); }
+.filters { overflow-x: auto; scrollbar-width: none; }
+.filters button { flex: none; }

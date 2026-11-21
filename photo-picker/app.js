@@ -281,8 +281,10 @@
   }, { rootMargin: "800px 0px" });
 
   // ------------------------------------------------------------ grid
+  // 一度でも ♥ を付けたことがあるのに、今は ♥ が無い写真（不具合で外れた分の復元用）
+  const wasSel = (p) => !p.sel && !!p.selAt;
   function listFor(month, f) {
-    return photos.filter((p) => p.month === month && (f === "all" || (f === "sel" ? p.sel : !p.sel)));
+    return photos.filter((p) => p.month === month && (f === "all" || (f === "sel" ? p.sel : f === "was" ? wasSel(p) : !p.sel)));
   }
 
   function renderGrid() {
@@ -307,7 +309,7 @@
     if (!photos.some((p) => p.month === curMonth)) {
       empty.hidden = false;
       empty.textContent = `この月の写真は、この端末にはまだ取り込んでいません。` + (other ? `（他の端末で ♥ ${other}枚 選択済み）` : "");
-    } else if (!list.length) empty.textContent = filter === "sel" ? "この月はまだ選んでいません" : "この月は全部選びました";
+    } else if (!list.length) empty.textContent = filter === "sel" ? "この月はまだ選んでいません" : filter === "was" ? "この月は、外れた ♥ はありません" : "この月は全部選びました";
   }
 
   function paintSel(p) {
@@ -548,6 +550,14 @@
         <span class="n"><b>${c.sel}</b> / ${c.all || "–"}</span></li>`;
     }).join("");
     $("#since").value = since;
+    const was = photos.filter(wasSel);
+    $("#restoreBox").hidden = !was.length;
+    if (was.length) {
+      const per = {};
+      for (const p of was) per[p.month] = (per[p.month] || 0) + 1;
+      $("#restoreCount").textContent = was.length;
+      $("#restoreDetail").textContent = Object.keys(per).sort().map((m) => `${+m.slice(5)}月 ${per[m]}`).join("・");
+    }
     $("#pcLink").textContent = location.href.replace(/[^/]*$/, "") + "pc.html";
     if (navigator.storage?.estimate) {
       const est = await navigator.storage.estimate();
@@ -601,6 +611,28 @@
     }
     LP.download(file, name);
     out.textContent = `✓ ${name} を保存しました（${list.count}枚分）。\nPCに送って、PCで上のページを開いてください。`;
+  };
+
+  $("#btnRestoreAll").onclick = async () => {
+    const was = photos.filter(wasSel);
+    if (!was.length) return;
+    if (!confirm(`前に ♥ を付けていた ${was.length}枚を、全部 ♥ に戻します。よろしいですか？\n（自分で外した写真も戻ります。あとで「前に♥」で確認して外せます）`)) return;
+    const now = Date.now();
+    for (const p of was) {
+      p.sel = true; p.selAt = now; p.synced = false;
+      delete unsel[skey(p)];
+      await idb.put("meta", p);
+    }
+    await idb.put("kv", unsel, "unsel");
+    renderChips(); renderGrid(); renderSummary();
+    scheduleSync(300);
+    toast(`${was.length}枚の ♥ を戻しました`);
+  };
+  $("#btnReviewWas").onclick = () => {
+    const first = photos.find(wasSel);
+    setFilter("was");
+    closeSheet();
+    if (first) goMonth(first.month); else { renderGrid(); }
   };
 
   $("#since").addEventListener("change", async (e) => {

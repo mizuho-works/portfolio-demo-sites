@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261121f">
+<link rel="stylesheet" href="style.css?v=20261121g">
 </head>
 <body>
 <header class="top">
@@ -34,6 +34,7 @@
     <button data-f="all" class="on">すべて</button>
     <button data-f="sel">♥ 選んだ</button>
     <button data-f="unsel">未選択</button>
+    <button data-f="was">前に♥</button>
     <span id="monthInfo" class="minfo"></span>
   </div>
 </header>
@@ -106,6 +107,13 @@
     <div class="sum-total"><b id="sumTotal">0</b> 枚 <small>L版</small></div>
     <ul id="sumList" class="sum-list"></ul>
 
+    <div id="restoreBox" class="export restorebox" hidden>
+      <h3>外れてしまった ♥ を戻す</h3>
+      <p>前に ♥ を付けたのに、今は ♥ が無い写真が <b id="restoreCount">0</b>枚あります（<span id="restoreDetail"></span>）。不具合で外れた ♥ もここに入っています。</p>
+      <button id="btnRestoreAll" class="primary">全部 ♥ に戻す</button>
+      <button id="btnReviewWas" class="ghost">1枚ずつ見て戻す（「前に♥」で表示）</button>
+    </div>
+
     <div class="export">
       <h3>PCでフォルダにまとめる</h3>
       <p>① 選んだ写真のリストをPCへ送る（LINE・メール・Googleドライブなど）<br>
@@ -173,7 +181,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261121f"></script>
-<script src="app.js?v=20261121f"></script>
+<script src="lib.js?v=20261121g"></script>
+<script src="app.js?v=20261121g"></script>
 </body>
 </html>
