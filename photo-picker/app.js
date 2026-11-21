@@ -96,7 +96,8 @@
     upd(0);
     // 画面が消えると止まるので、取り込み中はスリープさせない
     let wake = null;
-    try { wake = await navigator.wakeLock?.request("screen"); } catch {}
+    // 待たない（iPhoneのChromeなどでは返事が来ないことがあり、取り込みが 0 のまま止まっていた）
+    try { navigator.wakeLock?.request("screen").then((w) => { wake = w; }).catch(() => {}); } catch {}
     const t0 = Date.now();
     let next = 0, done = 0;
     const one = async (f) => {
@@ -112,7 +113,7 @@
         byId.set(id, null); // 同時処理での重複防止
         const img = await LP.decode(f);
         const [w, h] = LP.dims(img);
-        const prev = await LP.resize(img, { long: 1600, q: 0.82 });
+        const prev = await LP.resize(img, { long: 1440, q: 0.8 }); // 容量節約（1万枚でも入るように）
         if (img.close) img.close();
         const thumb = await LP.resize(await LP.decode(prev), { short: 300, q: 0.72 }); // 縮小版から作ると速い
         const meta = { id, name: f.name, dt, month, w, h, size: f.size, sel: false, at: Date.now() };
@@ -128,7 +129,11 @@
     };
     const worker = async () => {
       while (!cancelImport && next < files.length) {
-        await one(files[next++]);
+        const f = files[next++];
+        // 1枚で止まらないように時間制限（HEICの変換などで遅い場合も90秒で次へ）
+        const slow = setTimeout(() => { $("#pText").textContent += "（時間がかかっている写真があります…）"; }, 15000);
+        try { await LP.timeout(one(f), 90000); } catch { failed++; }
+        clearTimeout(slow);
         done++;
         upd(done);
         const left = (Date.now() - t0) / done * (files.length - done);
@@ -680,7 +685,7 @@
     syncTimer = setTimeout(syncNow, delay);
   }
   async function pullSheet(url) {
-    const r = await fetch(url, { cache: "no-store" });
+    const r = await fetch(url, { cache: "no-store", signal: LP.abortAfter(30000) });
     const j = await r.json();
     if (!j.ok) throw new Error("ng");
     return (j.items || []).filter((it) => it.name);
@@ -726,6 +731,7 @@
       const { m } = counts();
       const items = [...result.values()].sort((a, b) => (a.month + a.dt + a.name < b.month + b.dt + b.name ? -1 : 1));
       const r = await fetch(sheetUrl, {
+        signal: LP.abortAfter(30000),
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ items, months: months.map((mo) => ({ month: mo, sel: m[mo].sel, all: m[mo].all })) }),
       });

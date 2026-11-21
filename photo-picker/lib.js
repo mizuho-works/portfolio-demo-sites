@@ -251,7 +251,16 @@ const LP = (() => {
     return new File([blob], base, { type: /\.png$/i.test(base) ? "image/png" : /\.hei[cf]$/i.test(base) ? "image/heic" : "image/jpeg", lastModified: zip.lastModified });
   }
 
-  return { ZipWriter, zipComplete, zipEntries, zipFile, isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
+  // 時間制限
+  const timeout = (promise, ms) => Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+  function abortAfter(ms) {
+    if (window.AbortSignal && AbortSignal.timeout) return AbortSignal.timeout(ms);
+    const c = new AbortController();
+    setTimeout(() => c.abort(), ms);
+    return c.signal;
+  }
+
+  return { timeout, abortAfter, ZipWriter, zipComplete, zipEntries, zipFile, isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
 })();
 
 // 予期しないエラーを画面に出す（黙って止まらないように）
@@ -277,7 +286,7 @@ const LP = (() => {
 
 // 新しい版が出ていたら自動で読み込み直す（ブラウザに古いページが残っても大丈夫なように）
 (() => {
-  const CUR = "20261121b";
+  const CUR = "20261121c";
   fetch("version.json?t=" + Date.now(), { cache: "no-store" })
     .then((r) => r.json())
     .then(({ v }) => {
