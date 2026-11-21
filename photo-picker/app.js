@@ -39,6 +39,7 @@
     p.sel = on;
     p.selAt = Date.now();
     p.synced = false;
+    p.userOff = !on; // 自分で外した記録（不具合で外れた分と見分けるため）
     paintSel(p);
     if (navigator.vibrate) navigator.vibrate(8);
     try {
@@ -282,7 +283,12 @@
 
   // ------------------------------------------------------------ grid
   // 一度でも ♥ を付けたことがあるのに、今は ♥ が無い写真（不具合で外れた分の復元用）
-  const wasSel = (p) => !p.sel && !!p.selAt;
+  // ・自分で外した（userOff、または修正後の版で外した＝synced:false）→ 戻さない
+  // ・スプシ送信済みなのに外れた（synced:true）→ 不具合で外れた → 戻す
+  // ・それ以外（昨日の修正より前）→ どちらか分からない → 1枚ずつ確認
+  const lostByBug = (p) => !p.sel && !!p.selAt && !p.userOff && p.synced === true;
+  const lostUnknown = (p) => !p.sel && !!p.selAt && !p.userOff && p.synced === undefined;
+  const wasSel = (p) => lostByBug(p) || lostUnknown(p);
   function listFor(month, f) {
     return photos.filter((p) => p.month === month && (f === "all" || (f === "sel" ? p.sel : f === "was" ? wasSel(p) : !p.sel)));
   }
@@ -550,14 +556,19 @@
         <span class="n"><b>${c.sel}</b> / ${c.all || "–"}</span></li>`;
     }).join("");
     $("#since").value = since;
-    const was = photos.filter(wasSel);
-    $("#restoreBox").hidden = !was.length;
-    if (was.length) {
+    const bug = photos.filter(lostByBug), unk = photos.filter(lostUnknown);
+    $("#restoreBox").hidden = !bug.length && !unk.length;
+    const perText = (list) => {
       const per = {};
-      for (const p of was) per[p.month] = (per[p.month] || 0) + 1;
-      $("#restoreCount").textContent = was.length;
-      $("#restoreDetail").textContent = Object.keys(per).sort().map((m) => `${+m.slice(5)}月 ${per[m]}`).join("・");
-    }
+      for (const p of list) per[p.month] = (per[p.month] || 0) + 1;
+      return Object.keys(per).sort().map((m) => `${+m.slice(5)}月 ${per[m]}`).join("・");
+    };
+    $("#restoreCount").textContent = bug.length;
+    $("#restoreDetail").textContent = bug.length ? `（${perText(bug)}）` : "";
+    $("#btnRestoreAll").hidden = !bug.length;
+    $("#unknownCount").textContent = unk.length;
+    $("#unknownDetail").textContent = unk.length ? `（${perText(unk)}）` : "";
+    $("#unknownRow").hidden = !unk.length;
     $("#pcLink").textContent = location.href.replace(/[^/]*$/, "") + "pc.html";
     if (navigator.storage?.estimate) {
       const est = await navigator.storage.estimate();
@@ -614,9 +625,9 @@
   };
 
   $("#btnRestoreAll").onclick = async () => {
-    const was = photos.filter(wasSel);
+    const was = photos.filter(lostByBug);
     if (!was.length) return;
-    if (!confirm(`前に ♥ を付けていた ${was.length}枚を、全部 ♥ に戻します。よろしいですか？\n（自分で外した写真も戻ります。あとで「前に♥」で確認して外せます）`)) return;
+    if (!confirm(`不具合で外れた ${was.length}枚の ♥ を戻します。\n（自分で外した写真は戻しません）`)) return;
     const now = Date.now();
     for (const p of was) {
       p.sel = true; p.selAt = now; p.synced = false;
@@ -628,8 +639,15 @@
     scheduleSync(300);
     toast(`${was.length}枚の ♥ を戻しました`);
   };
+  $("#btnKeepOff").onclick = async () => {
+    const unk = photos.filter(lostUnknown);
+    if (!unk.length || !confirm(`どちらか分からない ${unk.length}枚を、外したままにします。`)) return;
+    for (const p of unk) { p.userOff = true; await idb.put("meta", p); }
+    renderGrid(); renderSummary();
+    toast(`${unk.length}枚は外したままにしました`);
+  };
   $("#btnReviewWas").onclick = () => {
-    const first = photos.find(wasSel);
+    const first = photos.find(lostUnknown) || photos.find(wasSel);
     setFilter("was");
     closeSheet();
     if (first) goMonth(first.month); else { renderGrid(); }

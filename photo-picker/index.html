@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261121g">
+<link rel="stylesheet" href="style.css?v=20261121h">
 </head>
 <body>
 <header class="top">
@@ -109,9 +109,13 @@
 
     <div id="restoreBox" class="export restorebox" hidden>
       <h3>外れてしまった ♥ を戻す</h3>
-      <p>前に ♥ を付けたのに、今は ♥ が無い写真が <b id="restoreCount">0</b>枚あります（<span id="restoreDetail"></span>）。不具合で外れた ♥ もここに入っています。</p>
-      <button id="btnRestoreAll" class="primary">全部 ♥ に戻す</button>
-      <button id="btnReviewWas" class="ghost">1枚ずつ見て戻す（「前に♥」で表示）</button>
+      <p><b>不具合で外れた ♥：<span id="restoreCount">0</span>枚</b><span id="restoreDetail"></span><br>自分で外した写真は入っていません。</p>
+      <button id="btnRestoreAll" class="primary">不具合で外れた分を ♥ に戻す</button>
+      <div id="unknownRow">
+        <p style="margin-top:12px"><b>どちらか分からない：<span id="unknownCount">0</span>枚</b><span id="unknownDetail"></span><br>昨日の修正より前に外れたもので、自分で外したのか不具合なのか記録から見分けられません。1枚ずつ見て、残したい写真だけ ♥ を押してください。</p>
+        <button id="btnReviewWas" class="ghost">1枚ずつ見て決める（「前に♥」で表示）</button>
+        <button id="btnKeepOff" class="ghost">分からない分は全部 外したままにする</button>
+      </div>
     </div>
 
     <div class="export">
@@ -181,7 +185,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261121g"></script>
-<script src="app.js?v=20261121g"></script>
+<script src="lib.js?v=20261121h"></script>
+<script src="app.js?v=20261121h"></script>
 </body>
 </html>
