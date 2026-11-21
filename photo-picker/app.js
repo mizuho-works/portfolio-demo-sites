@@ -222,6 +222,7 @@
     let total = 0;
     for (const mo of months) m[mo] = { all: 0, sel: 0, other: 0 };
     for (const p of photos) {
+      if (p.pruned && !p.sel) continue; // 容量を空けるために消した写真（♥なし）は数えない
       const c = (m[p.month] ||= { all: 0, sel: 0, other: 0 });
       c.all++;
       if (p.sel) { c.sel++; total++; }
@@ -286,11 +287,11 @@
   // ・自分で外した（userOff、または修正後の版で外した＝synced:false）→ 戻さない
   // ・スプシ送信済みなのに外れた（synced:true）→ 不具合で外れた → 戻す
   // ・それ以外（昨日の修正より前）→ どちらか分からない → 1枚ずつ確認
-  const lostByBug = (p) => !p.sel && !!p.selAt && !p.userOff && p.synced === true;
-  const lostUnknown = (p) => !p.sel && !!p.selAt && !p.userOff && p.synced === undefined;
+  const lostByBug = (p) => !p.pruned && !p.sel && !!p.selAt && !p.userOff && p.synced === true;
+  const lostUnknown = (p) => !p.pruned && !p.sel && !!p.selAt && !p.userOff && p.synced === undefined;
   const wasSel = (p) => lostByBug(p) || lostUnknown(p);
   function listFor(month, f) {
-    return photos.filter((p) => p.month === month && (f === "all" || (f === "sel" ? p.sel : f === "was" ? wasSel(p) : !p.sel)));
+    return photos.filter((p) => p.month === month && !(p.pruned && !p.sel) && (f === "all" || (f === "sel" ? p.sel : f === "was" ? wasSel(p) : !p.sel)));
   }
 
   function renderGrid() {
@@ -639,6 +640,49 @@
     scheduleSync(300);
     toast(`${was.length}枚の ♥ を戻しました`);
   };
+  // ------------------------------------------------------------ 決め終わった月の容量を空ける
+  function pruneTargets(until) {
+    return photos.filter((p) => p.month <= until && !p.sel && !p.pruned);
+  }
+  $("#pruneUntil").addEventListener("change", () => {
+    const v = $("#pruneUntil").value;
+    if (!v) { $("#pruneInfo").textContent = ""; return; }
+    const t = pruneTargets(v), keep = photos.filter((p) => p.month <= v && p.sel).length;
+    $("#pruneInfo").textContent = `${photos[0] ? photos[0].month.replace("-", "/") : ""}〜${v.replace("-", "/")}：♥ が無い ${t.length}枚 を消します（♥ の ${keep}枚は残します）`;
+  });
+  $("#btnPrune").onclick = async () => {
+    const v = $("#pruneUntil").value;
+    if (!v) { $("#pruneInfo").textContent = "どの月まで決め終わったか選んでください"; return; }
+    const t = pruneTargets(v);
+    if (!t.length) { $("#pruneInfo").textContent = "消せる写真はありません"; return; }
+    const keep = photos.filter((p) => p.month <= v && p.sel).length;
+    if (!confirm(`${v.replace("-", "年")}月までの、♥ が付いていない ${t.length}枚の取り込みデータを消します。\n♥ の ${keep}枚は残します。iPhone や PC の元の写真は消えません。\n（消した写真は、その月の一覧に出なくなります）`)) return;
+    const prog = $("#progress");
+    cancelImport = false;
+    prog.hidden = false;
+    let done = 0;
+    try {
+      for (let i = 0; i < t.length && !cancelImport; i += 150) {
+        const batch = t.slice(i, i + 150);
+        await idb.tx(["meta", "thumb", "prev"], "readwrite", (m, th, pv) => {
+          for (const p of batch) { p.pruned = true; m.put(p); th.delete(p.id); pv.delete(p.id); }
+        });
+        done += batch.length;
+        $("#pTitle").textContent = `容量を空けています… ${done} / ${t.length}`;
+        $("#pFill").style.width = `${(done / t.length) * 100}%`;
+        $("#pText").textContent = "♥ の写真はそのまま残します。";
+      }
+      dropUrls(() => false);
+      prog.hidden = true;
+      renderChips(); renderGrid(); renderSummary();
+      toast(`${done}枚の取り込みデータを消して、容量を空けました`);
+    } catch (e) {
+      prog.hidden = true;
+      if (e && e.name === "StorageStall") showStorageHelp("stall");
+      else toast(`途中で止まりました（${done}枚まで完了）。もう一度押すと続きから消します`);
+    }
+  };
+
   $("#btnKeepOff").onclick = async () => {
     const unk = photos.filter(lostUnknown);
     if (!unk.length || !confirm(`どちらか分からない ${unk.length}枚を、外したままにします。`)) return;

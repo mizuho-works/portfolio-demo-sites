@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261121i">
+<link rel="stylesheet" href="style.css?v=20261121j">
 </head>
 <body>
 <header class="top">
@@ -154,6 +154,13 @@
       <label class="row">リストから ♥ を復元
         <span class="filebtn">ファイルを選ぶ<input id="restore" type="file" accept=".json,application/json" hidden></span></label>
       <p class="note" id="storageInfo"></p>
+      <div class="prunebox">
+        <b>決め終わった月の容量を空ける</b>
+        <p class="note">選んだ月までの、<b>♥ が付いていない写真</b>の取り込みデータを消します。♥ の写真は残り、元の写真（iPhone・PC）は消えません。</p>
+        <label class="row">この月まで決め終わった <span><input id="pruneUntil" type="month"></span></label>
+        <p id="pruneInfo" class="note"></p>
+        <button id="btnPrune" class="primary">♥ の無い写真を消して容量を空ける</button>
+      </div>
       <button id="btnClearAll" class="ghost danger">すべてのデータを消す</button>
     </details>
   </div>
@@ -185,7 +192,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261121i"></script>
-<script src="app.js?v=20261121i"></script>
+<script src="lib.js?v=20261121j"></script>
+<script src="app.js?v=20261121j"></script>
 </body>
 </html>
