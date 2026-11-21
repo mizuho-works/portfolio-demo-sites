@@ -718,9 +718,27 @@
     const start = Date.now();
     let changed = 0;
     try {
-      const remote = await pullSheet(sheetUrl);
+      let remote = await pullSheet(sheetUrl);
       const lastSync = (await idb.get("kv", "lastSync")) || 0;
       const match = indexer();
+      // この端末で送信済みの ♥ のうち、スプシに見当たらないもの（＝他の端末で外された？）
+      const missing = (rows) => {
+        const seen = new Set();
+        for (const r of rows) { const p = match(r); seen.add(p ? p.id : "r:" + skey(r)); }
+        return photos.filter((p) => p.sel && p.synced && (p.selAt || p.at || 0) < lastSync && !seen.has(p.id));
+      };
+      let drops = missing(remote);
+      if (drops.length) {
+        // 安全装置: 他の端末が書き込み中のスプシを読んだだけかもしれないので、少し待って読み直して確かめる
+        await new Promise((r) => setTimeout(r, 4000));
+        remote = await pullSheet(sheetUrl);
+        const again = new Set(missing(remote).map((p) => p.id));
+        drops = drops.filter((p) => again.has(p.id));
+        const syncedCount = photos.filter((p) => p.sel && p.synced).length;
+        // 一度にたくさん消えるのは不自然 → 消さずにスプシへ戻す
+        if (drops.length > Math.max(3, syncedCount * 0.2)) drops = [];
+      }
+      const dropIds = new Set(drops.map((p) => p.id));
       const result = new Map();
       for (const r of remote) {
         const p = match(r);
@@ -736,9 +754,8 @@
         if (!p.sel) continue;
         const k = skey(p);
         if (result.has(k)) continue;
-        // 前回の同期より後に付けた ♥ → 追加。前回の同期で送ってあるのにスプシに無い → 他の端末で外された
-        if ((p.selAt || p.at || 0) >= lastSync || !p.synced) result.set(k, rowOf(p));
-        else { p.sel = false; await idb.put("meta", p); changed++; }
+        if (dropIds.has(p.id)) { p.sel = false; await idb.put("meta", p); changed++; }   // 他の端末で外された（2回確認済み）
+        else result.set(k, rowOf(p));                                                    // それ以外はスプシに入れる
       }
       for (const o of orphans) {
         const k = skey(o);
