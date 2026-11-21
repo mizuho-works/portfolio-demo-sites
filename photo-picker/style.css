@@ -271,8 +271,3 @@ body.pc { background: var(--bg); }
 .alt { display: block; margin-top: 10px; font-size: 13px; color: var(--muted); cursor: pointer; }
 .alt u { color: var(--ink); }
 @media (hover: none) and (pointer: coarse) { .pconly { display: none; } }
-.mchip.total-chip { background: var(--accent); color: #fff; }
-.mchip.total-chip .y, .mchip.total-chip .c { color: rgba(255,255,255,.85); }
-.mchip.total-chip .c b { color: #fff; }
-.v-hint.right { width: auto; min-width: 80px; }
-.mchip.total-chip { position: sticky; left: 0; z-index: 1; box-shadow: 6px 0 10px -2px var(--bg), -16px 0 0 var(--bg); }

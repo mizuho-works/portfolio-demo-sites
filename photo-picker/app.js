@@ -209,19 +209,15 @@
   function renderChips() {
     const { m, total } = counts();
     $("#totalCount").textContent = total;
-    const all = photos.length;
-    const totalChip = months.length ? `<button class="mchip total-chip" data-total="1" aria-label="全部の月の合計">
-        <span class="y">全月</span><span class="m">合計</span>
-        <span class="c"><b>${total}</b>/${all}</span></button>` : "";
-    $("#months").innerHTML = totalChip + months.map((mo) => {
+    $("#months").innerHTML = months.map((mo) => {
       const [y, mm] = mo.split("-");
       return `<button class="mchip${mo === curMonth ? " on" : ""}" data-m="${mo}">
         <span class="y">${y}</span><span class="m">${+mm}月</span>
         <span class="c"><b>${m[mo].sel}</b>/${m[mo].all || "–"}</span></button>`;
     }).join("");
     const c = m[curMonth] || { all: 0, sel: 0, other: 0 };
-    $("#monthInfo").textContent = curMonth ? `${+curMonth.slice(5)}月 ${c.sel}枚` + (c.other ? `（他の端末 ${c.other}）` : "") + ` ・ 合計 ${total}枚` : "";
-    if (!$("#viewer").hidden && curMonth) $("#vMonthCount").textContent = `${+curMonth.slice(5)}月 ♥${c.sel} ・ 計${total}`;
+    $("#monthInfo").textContent = curMonth ? `${c.sel}枚 選択中` + (c.other ? `（他の端末 ${c.other}）` : "") + ` / ${c.all}枚` : "";
+    if (!$("#viewer").hidden && curMonth) $("#vMonthCount").textContent = `${+curMonth.slice(5)}月 ♥${c.sel}`;
   }
 
   function scrollChipIntoView() {
@@ -314,9 +310,7 @@
   }
   $("#months").addEventListener("click", (e) => {
     const b = e.target.closest(".mchip");
-    if (!b) return;
-    if (b.dataset.total) return openSheet(); // 合計 → 月別の内訳
-    goMonth(b.dataset.m);
+    if (b) goMonth(b.dataset.m);
   });
 
   function setFilter(f) {
