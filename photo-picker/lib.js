@@ -13,7 +13,7 @@ const LP = (() => {
       for (let i = 0; i < n; i++) { const c = dv.getUint8(t + off + i); if (!c) break; s += String.fromCharCode(c); }
       return s.trim();
     };
-    const WANT = new Set([0x010f, 0x0110, 0x0132, 0x9003, 0x9291]);
+    const WANT = new Set([0x010f, 0x0110, 0x0132, 0x9003, 0x9291, 0x9011]);
     const readIfd = (off) => {
       const out = {};
       const n = u16(off);
@@ -33,6 +33,7 @@ const LP = (() => {
     return {
       dt,
       ss: (ex[0x9291] || "").replace(/\D/g, ""),
+      off: /^[+-]\d\d:\d\d$/.test(ex[0x9011] || "") ? ex[0x9011] : "", // 撮影地の時差（例 -10:00）
       model: model.startsWith(make) || !make ? model : `${make} ${model}`,
     };
   }
@@ -49,7 +50,7 @@ const LP = (() => {
       }
       if (file.size <= len) break;
     }
-    return { dt: null, ss: "", model: "" };
+    return { dt: null, ss: "", model: "", off: "" };
   }
   const exifDate = async (file) => (await exifInfo(file)).dt;
 
@@ -80,6 +81,17 @@ const LP = (() => {
       }
     } catch {}
     return null;
+  }
+  // 撮影地の時刻＋時差 → この端末の時刻（iPhoneの写真アプリはこちらで記録している）
+  function toDeviceTime(dt, off) {
+    const m = /^(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d):(\d\d)$/.exec(dt || "");
+    if (!m) return null;
+    const p = (n) => String(n).padStart(2, "0");
+    if (!off) return `${m[1]}/${m[2]}/${m[3]} ${m[4]}:${m[5]}:${m[6]}`;
+    const sign = off[0] === "-" ? -1 : 1, oh = +off.slice(1, 3), om = +off.slice(4, 6);
+    const utc = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) - sign * (oh * 60 + om) * 60000;
+    const d = new Date(utc);
+    return `${d.getFullYear()}/${p(d.getMonth() + 1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
   }
   const sameDims = (a, b) => !!(a && b && ((a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0])));
   const fmtBytes = (n) => (!n ? "" : n >= 1048576 ? `${(n / 1048576).toFixed(1)}MB` : `${Math.round(n / 1024)}KB`);
@@ -170,15 +182,20 @@ const LP = (() => {
   let dbp;
   function db() {
     return (dbp ||= new Promise((res, rej) => {
-      const r = indexedDB.open("l-picker", 1);
+      const r = indexedDB.open("l-picker", 2);
       r.onupgradeneeded = () => {
         const d = r.result;
-        d.createObjectStore("meta", { keyPath: "id" });
-        d.createObjectStore("thumb");
-        d.createObjectStore("prev");
-        d.createObjectStore("kv");
+        for (const [name, opt] of [["meta", { keyPath: "id" }], ["thumb"], ["prev"], ["kv"], ["events", { autoIncrement: true }]]) {
+          if (!d.objectStoreNames.contains(name)) d.createObjectStore(name, opt);
+        }
       };
-      r.onsuccess = () => res(r.result);
+      // 古い版のタブが開いたままだと更新できないので、知らせる
+      r.onblocked = () => alert("このアプリを開いている別のタブを閉じてから、もう一度開いてください。");
+      r.onsuccess = () => {
+        const d = r.result;
+        d.onversionchange = () => { d.close(); location.reload(); };
+        res(d);
+      };
       r.onerror = () => rej(r.error);
     }));
   }
@@ -307,7 +324,47 @@ const LP = (() => {
     return c.signal;
   }
 
-  return { exifInfo, imageDims, sameDims, fmtBytes, timeout, abortAfter, ZipWriter, zipComplete, zipEntries, zipFile, isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
+  // ---------------------------------------------------------------- ♥ のリスト と アップロードしたファイル一覧 を照合
+  // want: [{name, bytes}]  files: [{no, name, size, hidden}]
+  function sizeNum(v) {
+    if (typeof v === "number") return v;
+    const m = String(v || "").replace(/,/g, "").match(/([\d.]+)\s*(B|KB|MB|GB)?/i);
+    if (!m) return 0;
+    return parseFloat(m[1]) * ({ B: 1, KB: 1024, MB: 1048576, GB: 1073741824 }[(m[2] || "B").toUpperCase()]);
+  }
+  function normStem(name) {
+    return String(name || "").replace(/\.[^.]+$/, "").replace(/^\d{4}-\d\d_/, "").replace(/\s*\(\d+\)$/, "").replace(/\s+/g, "").toLowerCase();
+  }
+  function matchFiles(want, files) {
+    const left = files.map((f) => ({ ...f, n: f.hidden ? null : normStem(f.name), b: sizeNum(f.size) }));
+    const used = new Set(), missing = [];
+    const pick = (cands, b) => {
+      if (!cands.length) return null;
+      if (!b) return cands[0];
+      return cands.reduce((x, y) => (Math.abs(y.b - b) < Math.abs(x.b - b) ? y : x));
+    };
+    const rest = [];
+    for (const w of want) {
+      const b = sizeNum(w.bytes), n = normStem(w.name);
+      const f = pick(left.filter((f) => !used.has(f) && f.n === n), b);
+      if (f) used.add(f); else rest.push(w);
+    }
+    // 名前が伏せ字のファイルは、大きさが近い（±5%）写真と組にする
+    for (const w of rest) {
+      const b = sizeNum(w.bytes);
+      const f = b ? pick(left.filter((f) => !used.has(f) && f.hidden && f.b && Math.abs(f.b - b) <= b * 0.05), b) : null;
+      if (f) used.add(f); else missing.push(w);
+    }
+    let extra = left.filter((f) => !used.has(f)).map(({ n, b, ...f }) => f);
+    // 伏せ字のファイルが残りと同じ数なら「たぶん同じ」として分けて出す（確かめられないので要確認）
+    let guessed = [];
+    if (missing.length && extra.length === missing.length && extra.every((f) => f.hidden)) {
+      guessed = missing.splice(0); extra = [];
+    }
+    return { missing, extra, guessed };
+  }
+
+  return { matchFiles, sizeNum, normStem, toDeviceTime, exifInfo, imageDims, sameDims, fmtBytes, timeout, abortAfter, ZipWriter, zipComplete, zipEntries, zipFile, isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
 })();
 
 // 予期しないエラーを画面に出す（黙って止まらないように）
@@ -333,7 +390,7 @@ const LP = (() => {
 
 // 新しい版が出ていたら自動で読み込み直す（ブラウザに古いページが残っても大丈夫なように）
 (() => {
-  const CUR = "20261127m";
+  const CUR = "20261127n";
   fetch("version.json?t=" + Date.now(), { cache: "no-store" })
     .then((r) => r.json())
     .then(({ v }) => {

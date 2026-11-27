@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261127m">
+<link rel="stylesheet" href="style.css?v=20261127n">
 </head>
 <body>
 <header class="top">
@@ -163,7 +163,16 @@
           <li>このページで「撮影日時のリストをコピー」→ メモを通さず、すぐショートカット「L判アルバム」を実行（▶）</li>
         </ol>
         <p class="note">撮影日時で候補を探し、ファイル名が同じ写真だけを入れるので、連写も1枚ずつ見分けます。撮影日時が無い写真はリストに入らないので、表示された分だけ手で追加してください。</p>
+        <p><a href="shortcut-guide.png" target="_blank">完成したショートカットの見本（画像）</a></p>
       </details>
+    </div>
+
+    <div class="export gigabox">
+      <h3>✅ GigaFile便にアップした写真と照合</h3>
+      <p>アップロードしたGigaFile便のURLを貼ると、♥ の写真と1枚ずつ照らし合わせて、<b>足りない写真</b>と<b>余分なファイル</b>を出します（連写や同じ名前の写真も、ファイルの大きさで見分けます）。</p>
+      <div class="urlrow"><input id="gigaUrl" type="url" placeholder="https://○○.gigafile.nu/…" autocomplete="off"><button id="btnGiga" class="primary sm">照合</button></div>
+      <pre id="gigaResult" class="result gigaout"></pre>
+      <button id="gigaShow" class="ghost" hidden>足りない・要確認の写真を画像で見る</button>
     </div>
 
     <div class="export">
@@ -179,7 +188,8 @@
       <p>♥ を付けるたびに自分のGoogleスプレッドシートへ自動保存します。スマホのデータが消えても復元でき、PCではスプシからそのまままとめられます。<br>状態：<b id="sheetStatus">未接続</b></p>
       <div id="gsUpdate" class="warnbox" hidden>
         <b>スクリプトを新しくしてください（1回だけ・URLはそのまま）</b><br>
-        ファイル名だけでは見分けにくいので、撮影日時・画像サイズ・機種・PCの場所もスプシに保存できるようになりました。<br>
+        ♥ を付けた・外した記録（「履歴」シート）と、GigaFile便との照合ができるようになりました。<br>
+        ④ 初回だけ「アクセスを承認」→「許可」が出ます（GigaFile便のページを読むため）。<br>
         ① PCでスプシの「拡張機能 → Apps Script」を開く ② 中身を全部消して <button class="filebtn" onclick="document.getElementById('copyGs').click()">新しいコードをコピー</button> を貼って保存 ③「デプロイ → デプロイを管理」→ 鉛筆マーク →「バージョン：新バージョン」→「デプロイ」
       </div>
       <div class="urlrow"><input id="sheetUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"><button id="sheetSave" class="primary sm">接続</button></div>
@@ -227,6 +237,14 @@
         <p id="pruneInfo" class="note"></p>
         <button id="btnPrune" class="primary">♥ の無い写真を消して容量を空ける</button>
       </div>
+      <details id="histOpen" class="prunebox">
+        <summary><b>♥ の履歴から、前の状態に戻す</b></summary>
+        <p class="note">♥ を付けた・外した記録を、このスマホとスプシの「履歴」シートに残しています。♥ が消えたときは、消える前の日時を選んで戻せます。</p>
+        <p id="histInfo" class="note"></p>
+        <label class="row">この日時の状態に戻す <span><input id="histAt" type="datetime-local" step="1"></span></label>
+        <button id="btnHistRestore" class="primary">この日時に戻す（確認が出ます）</button>
+        <ul id="histList" class="histlist"></ul>
+      </details>
       <button id="btnClearAll" class="ghost danger">すべてのデータを消す</button>
     </details>
   </div>
@@ -278,7 +296,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261127m"></script>
-<script src="app.js?v=20261127m"></script>
+<script src="lib.js?v=20261127n"></script>
+<script src="app.js?v=20261127n"></script>
 </body>
 </html>
