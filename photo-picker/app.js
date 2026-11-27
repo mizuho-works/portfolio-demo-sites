@@ -659,8 +659,9 @@
   };
 
   // アルバムと見比べる：このスマホにある ♥ の写真を撮影日順・月ごとに全部表示
-  $("#btnCompare").onclick = () => {
-    const list = photos.filter((p) => p.sel).sort((a, b) => ((a.dt || a.month) + a.name < (b.dt || b.month) + b.name ? -1 : 1));
+  $("#btnCompare").onclick = () => showPhotoList(photos.filter((p) => p.sel), "♥ の写真（撮影日の古い順）", null);
+  function showPhotoList(src, title, infoText) {
+    const list = src.slice().sort((a, b) => ((a.dt || a.month) + a.name < (b.dt || b.month) + b.name ? -1 : 1));
     const body = $("#cmpBody");
     const frag = document.createDocumentFragment();
     let cur = null, grid = null, n = 0;
@@ -679,18 +680,29 @@
       n++;
       const d = document.createElement("div");
       d.className = "cmp-item";
-      const when = p.dt ? p.dt.slice(5, 16).replace(/^(\d\d):(\d\d) /, "$1/$2 ") : "日時なし";
+      const when = p.dt ? p.dt.slice(5, 16).replace(/^(\d\d):(\d\d) /, "$1/$2 ") : `日時なし ${p.name.replace(/\.[^.]+$/, "").slice(0, 14)}`;
       d.innerHTML = `<img alt="" loading="lazy"><span>${n}. ${when}</span>`;
       thumbUrl(p.id).then((u) => { if (u) d.querySelector("img").src = u; });
       d.onclick = () => openViewer([p], 0);
       grid.appendChild(d);
     }
     body.replaceChildren(frag);
-    $("#cmpInfo").textContent = `このスマホの ♥：${list.length}枚（他の端末で選んだ分は入りません）`;
+    $("#cmpTitle").textContent = title;
+    $("#cmpInfo").textContent = infoText || `このスマホの ♥：${list.length}枚（他の端末で選んだ分は入りません）`;
     $("#compare").hidden = false;
     body.scrollTop = 0;
-  };
+  }
   $("#cmpClose").onclick = () => { $("#compare").hidden = true; };
+  function openFindFromUrl() {
+    const q = new URL(location.href).searchParams.get("find");
+    if (!q) return;
+    const want = q.split(",").map((t) => t.trim()).filter(Boolean).map((t) => { const [n, m] = t.split("@"); return { stem: n.toLowerCase(), month: m || "" }; });
+    const stemOf = (n) => n.replace(/\.[^.]+$/, "").toLowerCase();
+    const hits = photos.filter((p) => want.some((w) => w.stem === stemOf(p.name) && (!w.month || w.month === p.month)));
+    const found = new Set(hits.map((p) => stemOf(p.name) + "@" + p.month));
+    const notHere = want.filter((w) => ![...found].some((k) => k.startsWith(w.stem + "@") && (!w.month || k.endsWith("@" + w.month))));
+    showPhotoList(hits, "足りない写真", `${hits.length}枚` + (notHere.length ? `（このスマホに無い：${notHere.map((w) => w.stem).join("、")}）` : "") + "　写真アプリのこの日付のあたりで探してください");
+  }
 
   $("#btnExport").onclick = async () => {
     const out = $("#exportResult");
@@ -1191,6 +1203,7 @@
       scrollChipIntoView();
       await resumePosition();
       if (sheetUrl) syncNow();
+      openFindFromUrl();
     } catch (e) {
       if (e && e.name === "StorageStall") { showStorageHelp("stall"); return; }
       $("#empty").hidden = false;
