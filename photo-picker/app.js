@@ -619,6 +619,21 @@
     return { app: "l-picker", version: 1, created: new Date().toISOString(), since, count: items.length, items };
   }
 
+  // iPhoneのショートカット用：♥ の写真の撮影日時（1行1枚、「2025/05/03 14:04:12」形式）
+  $("#btnAlbumList").onclick = async () => {
+    const all = photos.filter((p) => p.sel).concat(extras());
+    const withDt = all.filter((p) => p.dt), noDt = all.filter((p) => !p.dt);
+    const lines = [...new Set(withDt.map((p) => p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3")))].sort();
+    const out = $("#albumResult");
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      out.textContent = `✓ ${lines.length}枚分の撮影日時をコピーしました。ショートカット「L版アルバム」を実行してください。` +
+        (noDt.length ? `\n\n撮影日時が無いので手で追加してください（${noDt.length}枚）：\n` + noDt.map((p) => `${p.month.replace("-", "/")}　${p.name}`).join("\n") : "");
+    } catch {
+      out.textContent = "コピーできませんでした。もう一度押してください。";
+    }
+  };
+
   $("#btnExport").onclick = async () => {
     const out = $("#exportResult");
     const list = buildList();

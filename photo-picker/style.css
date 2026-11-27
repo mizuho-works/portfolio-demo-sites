@@ -282,3 +282,5 @@ body.pc { background: var(--bg); }
 .ghostbtn.sm, .primary.sm { padding: 7px 14px; font-size: 13px; margin-top: 6px; }
 .iphone-help { margin-top: 10px; }
 .iphone-help ol { padding-left: 20px; }
+.albumbox { border: 2px solid var(--ink); margin-top: 14px; }
+.howto ol { padding-left: 18px; margin: 4px 0; }
