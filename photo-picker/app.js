@@ -658,6 +658,40 @@
     grid.replaceChildren(frag);
   };
 
+  // アルバムと見比べる：このスマホにある ♥ の写真を撮影日順・月ごとに全部表示
+  $("#btnCompare").onclick = () => {
+    const list = photos.filter((p) => p.sel).sort((a, b) => ((a.dt || a.month) + a.name < (b.dt || b.month) + b.name ? -1 : 1));
+    const body = $("#cmpBody");
+    const frag = document.createDocumentFragment();
+    let cur = null, grid = null, n = 0;
+    const per = {};
+    for (const p of list) per[p.month] = (per[p.month] || 0) + 1;
+    for (const p of list) {
+      if (p.month !== cur) {
+        cur = p.month;
+        const h = document.createElement("h3");
+        h.textContent = `${cur.replace("-", "年")}月　${per[cur]}枚`;
+        frag.appendChild(h);
+        grid = document.createElement("div");
+        grid.className = "cmp-grid";
+        frag.appendChild(grid);
+      }
+      n++;
+      const d = document.createElement("div");
+      d.className = "cmp-item";
+      const when = p.dt ? p.dt.slice(5, 16).replace(/^(\d\d):(\d\d) /, "$1/$2 ") : "日時なし";
+      d.innerHTML = `<img alt="" loading="lazy"><span>${n}. ${when}</span>`;
+      thumbUrl(p.id).then((u) => { if (u) d.querySelector("img").src = u; });
+      d.onclick = () => openViewer([p], 0);
+      grid.appendChild(d);
+    }
+    body.replaceChildren(frag);
+    $("#cmpInfo").textContent = `このスマホの ♥：${list.length}枚（他の端末で選んだ分は入りません）`;
+    $("#compare").hidden = false;
+    body.scrollTop = 0;
+  };
+  $("#cmpClose").onclick = () => { $("#compare").hidden = true; };
+
   $("#btnExport").onclick = async () => {
     const out = $("#exportResult");
     const list = buildList();
