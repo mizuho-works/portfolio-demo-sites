@@ -312,6 +312,12 @@
     if (url) writePcPaths(url).catch((e) => { const el = $("#pcPathInfo"); if (el) el.textContent = `⚠ スプシに書き込めませんでした（${e && e.message || e}）`; });
   }
   const sheetUrlForWrite = () => { try { return listSheetUrl || localStorage.getItem("lp.sheetUrl") || null; } catch { return listSheetUrl; } };
+  // 見つからない写真がある月 → iPhoneの DCIM のフォルダ名（例: 202509__）
+  function missMonths(miss) {
+    const per = {};
+    for (const m of miss) { const mo = m.item.month || "?"; per[mo] = (per[mo] || 0) + 1; }
+    return Object.keys(per).sort().map((mo) => `<code>${mo.replace("-", "")}</code>で始まるフォルダ（${+mo.slice(5)}月・${per[mo]}枚）`).join("、");
+  }
   function showMatch(gained) {
     const miss = matches.filter((m) => !m.file);
     const desc = (it) => `${it.name}　${it.dt || it.month}${it.dims ? "　" + it.dims : ""}${it.model ? "　" + it.model : ""}`;
@@ -321,7 +327,9 @@
         `<li>${esc(m.item.name)} <small>${esc(m.item.dt || m.item.month)}${m.item.dims ? " ・ " + esc(m.item.dims) : ""}${m.item.model ? " ・ " + esc(m.item.model) : ""}</small></li>`).join("")}</ul>
         <button id="copyMiss" class="ghostbtn sm">この一覧をコピー</button></details>
         <div class="morebox"><b>見つからない分を、別のフォルダで探す</b>（見つかった分はそのまま）<br>
-        <small>iPhoneの写真は、いったんPCのフォルダにコピーしてから選んでください（下の手順）。</small><br>
+        <small>iPhoneの写真は、いったんPCのフォルダにコピーしてから選んでください（下の手順）。<br>
+        <b>コピーするのは、iPhoneの「DCIM」の中の次の月のフォルダだけでOK</b>（全部コピーしなくて大丈夫）：<br>
+        ${missMonths(miss)}</small><br>
         <button id="pickMore" class="primary sm">別のフォルダを選ぶ</button>
         <label class="alt">選んでも何も起きないときは → <u>こちらから選ぶ</u><input id="pickMoreAlt" type="file" webkitdirectory multiple hidden></label></div>` : "") +
       (matches.length > miss.length ? "<br>次に <b>3. まとめ先を選んでコピー</b> を押してください。" : "") +
