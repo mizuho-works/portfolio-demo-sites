@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261127g">
+<link rel="stylesheet" href="style.css?v=20261127h">
 </head>
 <body>
 <header class="top">
@@ -124,10 +124,22 @@
       <p>iPhoneの「ショートカット」で、♥ の写真（元の画質）をアルバムにまとめます。しまうまプリントなどのアプリでそのアルバムを選べば、そのまま注文できます。</p>
       <button id="btnAlbumList" class="primary">撮影日時のリストをコピー</button>
       <p id="albumResult" class="result"></p>
+      <button id="btnAlbumRest" class="ghost">残りの写真のリストをコピー（撮影日時なし・名前が違う写真用）</button>
+      <p id="albumRestResult" class="result"></p>
+      <details>
+        <summary>残りの写真用ショートカットの作り方（今のショートカットを複製して2か所変えるだけ）</summary>
+        <ol class="howto">
+          <li>ショートカット「L判アルバム」を長押し →「<b>複製</b>」→ 名前を「<b>L判アルバム 残り</b>」に変える</li>
+          <li>中の「日付 に 1 <b>秒</b> を追加」の「秒」をタップして <b>「か月」</b> にする（1 か月）</li>
+          <li>一番下のアルバム名を「<b>L判印刷 残り</b>」に変える</li>
+          <li>このページで「残りの写真のリストをコピー」→「L判アルバム 残り」を実行（▶）</li>
+        </ol>
+        <p class="note">その月の中から、名前が同じ写真を探します。しまうまプリントでは「L判印刷」と「L判印刷 残り」の両方のアルバムから選んでください。</p>
+      </details>
       <details>
         <summary>ショートカットの作り方（最初の1回だけ・5分）</summary>
         <ol class="howto">
-          <li>「ショートカット」アプリ → 右上の <b>＋</b> → 名前を「L版アルバム」にする</li>
+          <li>「ショートカット」アプリ → 右上の <b>＋</b> → 名前を「L判アルバム」にする</li>
           <li>アクションを上から順に追加（検索欄にアクション名を入れて探す）：
             <ol>
               <li><b>クリップボードを取得</b></li>
@@ -143,10 +155,10 @@
               <li><b>もし</b>（<b>名前</b> が <b>次を含む</b>：5の <b>リストの項目</b>）</li>
               <li><b>変数に追加</b>（<b>繰り返し項目 2</b> を 変数「<b>選んだ写真</b>」に追加）</li>
               <li>（「もし」の終了・2つ目の「繰り返しの終了」・1つ目の「繰り返しの終了」）</li>
-              <li><b>写真アルバムを作成</b>（名前：<b>L版印刷</b>、写真：変数「<b>選んだ写真</b>」）← 一番最後</li>
+              <li><b>写真アルバムを作成</b>（名前：<b>L判印刷</b>、写真：変数「<b>選んだ写真</b>」）← 一番最後</li>
             </ol>
           </li>
-          <li>このページで「撮影日時のリストをコピー」→ メモを通さず、すぐショートカット「L版アルバム」を実行（▶）</li>
+          <li>このページで「撮影日時のリストをコピー」→ メモを通さず、すぐショートカット「L判アルバム」を実行（▶）</li>
         </ol>
         <p class="note">撮影日時で候補を探し、ファイル名が同じ写真だけを入れるので、連写も1枚ずつ見分けます。撮影日時が無い写真はリストに入らないので、表示された分だけ手で追加してください。</p>
       </details>
@@ -244,7 +256,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261127g"></script>
-<script src="app.js?v=20261127g"></script>
+<script src="lib.js?v=20261127h"></script>
+<script src="app.js?v=20261127h"></script>
 </body>
 </html>

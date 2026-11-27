@@ -628,8 +628,24 @@
     const out = $("#albumResult");
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
-      out.textContent = `✓ ${lines.length}枚分の撮影日時をコピーしました。ショートカット「L版アルバム」を実行してください。` +
+      out.textContent = `✓ ${lines.length}枚分の撮影日時をコピーしました。ショートカット「L判アルバム」を実行してください。` +
         (noDt.length ? `\n\n撮影日時が無いので手で追加してください（${noDt.length}枚）：\n` + noDt.map((p) => `${p.month.replace("-", "/")}　${p.name}`).join("\n") : "");
+    } catch {
+      out.textContent = "コピーできませんでした。もう一度押してください。";
+    }
+  };
+
+  // 残りの写真（撮影日時が無い・名前が変わっている）→「その月の1日|名前」または「撮影日時|名前」で、1か月の幅で探す
+  $("#btnAlbumRest").onclick = async () => {
+    const all = photos.filter((p) => p.sel).concat(extras());
+    const stemOf = (n) => n.replace(/\.[^.]+$/, "");
+    const rest = all.filter((p) => !p.dt || !/^IMG_E?\d{4}$/i.test(stemOf(p.name)));
+    const lines = [...new Set(rest.map((p) => (p.dt ? p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3") : `${p.month.replace("-", "/")}/01 00:00:00`) + "|" + stemOf(p.name)))].sort();
+    const out = $("#albumRestResult");
+    if (!lines.length) { out.textContent = "残りの写真はありません"; return; }
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      out.textContent = `✓ ${lines.length}枚分をコピーしました。ショートカット「L判アルバム 残り」を実行してください。\n\n` + rest.map((p) => `${p.month.replace("-", "/")}　${p.name}`).join("\n");
     } catch {
       out.textContent = "コピーできませんでした。もう一度押してください。";
     }
