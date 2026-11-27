@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261121k">
+<link rel="stylesheet" href="style.css?v=20261127a">
 </head>
 <body>
 <header class="top">
@@ -130,6 +130,11 @@
     <div class="export sheetbox">
       <h3>☁ スプレッドシートに自動保存</h3>
       <p>♥ を付けるたびに自分のGoogleスプレッドシートへ自動保存します。スマホのデータが消えても復元でき、PCではスプシからそのまままとめられます。<br>状態：<b id="sheetStatus">未接続</b></p>
+      <div id="gsUpdate" class="warnbox" hidden>
+        <b>スクリプトを新しくしてください（1回だけ・URLはそのまま）</b><br>
+        ファイル名だけでは見分けにくいので、撮影日時・画像サイズ・機種・PCの場所もスプシに保存できるようになりました。<br>
+        ① PCでスプシの「拡張機能 → Apps Script」を開く ② 中身を全部消して <button class="filebtn" onclick="document.getElementById('copyGs').click()">新しいコードをコピー</button> を貼って保存 ③「デプロイ → デプロイを管理」→ 鉛筆マーク →「バージョン：新バージョン」→「デプロイ」
+      </div>
       <div class="urlrow"><input id="sheetUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"><button id="sheetSave" class="primary sm">接続</button></div>
       <details>
         <summary>はじめての設定（3分・最初の1回だけ）</summary>
@@ -206,7 +211,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261121k"></script>
-<script src="app.js?v=20261121k"></script>
+<script src="lib.js?v=20261127a"></script>
+<script src="app.js?v=20261127a"></script>
 </body>
 </html>

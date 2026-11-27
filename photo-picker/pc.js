@@ -9,7 +9,7 @@
   const say = (sel, html) => { const el = $(sel); el.innerHTML = html; el.scrollIntoView({ block: "nearest" }); };
   const ym = (m) => m.replace("-", "年").replace(/-?(\d+)$/, (_, d) => `${+d}月`);
 
-  let list = null;     // {items:[{name, dt, month}]}
+  let list = null, listSheetUrl = null;     // {items:[{name, dt, month}]}
   let srcFiles = null, srcName = "";
   let matches = null;  // [{item, file|null}]
   let lightFiles = null, lightName = "";
@@ -77,18 +77,40 @@
     return { name: dir.name, files };
   }
 
+  async function fileInfo(f) {
+    if (f.dt === undefined) {
+      const i = await LP.exifInfo(await f.getFile()).catch(() => ({ dt: null, ss: "", model: "" }));
+      f.dt = i.dt; f.ss = i.ss; f.model = i.model;
+    }
+    return f;
+  }
   async function fileMonth(f) {
     if (f.month) return f.month;
     if (f.dirMonth) return (f.month = f.dirMonth);
     const m = LP.monthFromText(f.name);
     if (m) return (f.month = m);
-    const file = await f.getFile();
-    if (f.dt === undefined) f.dt = await LP.exifDate(file).catch(() => null);
-    return (f.month = LP.monthFromDt(f.dt) || LP.monthFromTime(file.lastModified));
+    await fileInfo(f);
+    return (f.month = LP.monthFromDt(f.dt) || LP.monthFromTime((await f.getFile()).lastModified));
   }
-  async function fileDt(f) {
-    if (f.dt === undefined) f.dt = await LP.exifDate(await f.getFile()).catch(() => null);
-    return f.dt;
+  async function fileDt(f) { return (await fileInfo(f)).dt; }
+  async function fileDims(f) {
+    if (f.dims === undefined) f.dims = await LP.imageDims(await f.getFile());
+    return f.dims;
+  }
+  const itemDims = (it) => {
+    if (it.w && it.h) return [+it.w, +it.h];
+    const m = /^(\d+)\D+(\d+)$/.exec(it.dims || "");
+    return m ? [+m[1], +m[2]] : null;
+  };
+  // 候補が複数あるとき、秒以下 → 画像サイズ → 機種 の順で絞る
+  async function narrow(it, list) {
+    if (list.length <= 1) return list;
+    let l = list;
+    if (it.ss) { await Promise.all(l.map(fileInfo)); const x = l.filter((f) => f.ss && f.ss === it.ss); if (x.length) l = x; }
+    const d = itemDims(it);
+    if (l.length > 1 && d) { const x = []; for (const f of l) if (LP.sameDims(await fileDims(f), d)) x.push(f); if (x.length) l = x; }
+    if (l.length > 1 && it.model) { await Promise.all(l.map(fileInfo)); const x = l.filter((f) => f.model && f.model === it.model); if (x.length) l = x; }
+    return l;
   }
 
   // ============================================================ A. 月別ZIP
@@ -213,7 +235,7 @@
   // 同じPCのブラウザで ♥ を付けた分（スマホ用画面をPCで使った場合）
   (async () => {
     try {
-      const sel = (await LP.idb.all("meta")).filter((p) => p.sel).map((p) => ({ name: p.name, dt: p.dt || null, month: p.month }));
+      const sel = (await LP.idb.all("meta")).filter((p) => p.sel).map((p) => ({ name: p.name, dt: p.dt || null, month: p.month, w: p.w, h: p.h, ss: p.ss || "", model: p.model || "" }));
       const extra = ((await LP.idb.get("kv", "remoteOnly")) || []).concat((await LP.idb.get("kv", "orphans")) || [])
         .map((o) => ({ name: o.name, dt: o.dt || null, month: o.month }));
       const items = sel.concat(extra);
@@ -221,10 +243,10 @@
       $("#localCount").textContent = items.length;
       $("#useLocal").hidden = false;
       $("#listLabel").classList.replace("primary", "ghostbtn");
-      $("#useLocal").onclick = () => loadList(new File([JSON.stringify({ items })], "local.json"));
+      $("#useLocal").onclick = () => (listSheetUrl = null, loadList(new File([JSON.stringify({ items })], "local.json")));
     } catch {}
   })();
-  $("#listFile").addEventListener("change", (e) => { if (e.target.files[0]) loadList(e.target.files[0]); e.target.value = ""; });
+  $("#listFile").addEventListener("change", (e) => { listSheetUrl = null; if (e.target.files[0]) loadList(e.target.files[0]); e.target.value = ""; });
   try { $("#sheetUrl").value = localStorage.getItem("lp.sheetUrl") || ""; } catch {}
   $("#sheetLoad").onclick = async () => {
     const url = $("#sheetUrl").value.trim();
@@ -236,6 +258,7 @@
       try { localStorage.setItem("lp.sheetUrl", url); } catch {}
       const items = j.items.map((it) => ({ ...it, dt: it.dt || null }));
       await loadList(new File([JSON.stringify({ items })], "sheet.json"));
+      listSheetUrl = url;
     } catch {
       say("#listInfo", "スプシを読めませんでした。スマホの設定に貼ったのと同じURLか確認してください。");
     }
@@ -282,25 +305,64 @@
     const miss = matches.filter((m) => !m.file);
     say("#srcInfo", `<b>✓ ${matches.length - miss.length} / ${matches.length}枚</b> 見つかりました（${esc(srcName)}）` +
       (miss.length ? `<details open><summary>見つからない ${miss.length}枚</summary><ul>${miss.map((m) =>
-        `<li>${esc(m.item.name)} <small>${m.item.dt || m.item.month}</small></li>`).join("")}</ul>
+        `<li>${esc(m.item.name)} <small>${esc(m.item.dt || m.item.month)}${m.item.dims ? " ・ " + esc(m.item.dims) : ""}${m.item.model ? " ・ " + esc(m.item.model) : ""}</small></li>`).join("")}</ul>
         <small>別のフォルダにあるかもしれません。もっと上のフォルダを選び直してみてください。</small></details>` : "") +
-      (matches.length > miss.length ? "<br>次に <b>3. まとめ先を選んでコピー</b> を押してください。" : ""));
+      (matches.length > miss.length ? "<br>次に <b>3. まとめ先を選んでコピー</b> を押してください。" : "") +
+      (listSheetUrl ? `<div id="pcPathInfo" class="note">スプシに「PCの場所」を書き込んでいます…</div>` : ""));
     $("#s2").classList.add("done");
+    if (listSheetUrl) writePcPaths().catch(() => {});
   }
 
   async function findFile(it, byStem) {
     const cands = byStem.get(LP.stem(it.name)) || [];
-    if (it.dt) for (const f of cands) if ((await fileDt(f)) === it.dt) return f;
+    // ① 同じ名前 ＋ 同じ撮影日時
+    if (it.dt) {
+      const hit = [];
+      for (const f of cands) if ((await fileDt(f)) === it.dt) hit.push(f);
+      if (hit.length) return (await narrow(it, hit))[0];
+    }
+    // ② 同じ名前 ＋ 同じ月（撮影日時が無いとき）
     const sameMonth = [];
     for (const f of cands) if ((await fileMonth(f)) === it.month) sameMonth.push(f);
-    if (sameMonth.length === 1) return sameMonth[0];
-    if (!it.dt) return sameMonth[0] || (cands.length === 1 ? cands[0] : null);
-    // 名前が変わっている (iPhoneの共有など) → 同じ月の写真を撮影日時で探す
+    if (!it.dt && sameMonth.length) return (await narrow(it, sameMonth))[0];
+    if (!it.dt) return cands.length === 1 ? cands[0] : null;
+    // ③ 名前が変わっている（iPhoneの共有など）→ 前後の月も含めて撮影日時で探す
+    const near = new Set([it.month, shiftMonth(it.month, -1), shiftMonth(it.month, 1)]);
+    const hit = [];
     for (const f of srcFiles) {
-      if ((await fileMonth(f)) !== it.month) continue;
-      if ((await fileDt(f)) === it.dt) return f;
+      if (!near.has(await fileMonth(f))) continue;
+      if ((await fileDt(f)) === it.dt) hit.push(f);
     }
-    return sameMonth[0] || null;
+    if (hit.length) return (await narrow(it, hit))[0];
+    return null;
+  }
+  function shiftMonth(m, d) {
+    const [y, mo] = m.split("-").map(Number);
+    const t = new Date(y, mo - 1 + d, 1);
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  // 見つかった写真のPCの場所をスプシに書き込む（同じ名前の写真があっても、どれか分かるように）
+  const rowKey = (r) => (r.dt ? `${r.dt}|${LP.stem(r.name)}` : `${LP.stem(r.name)}|${r.month}`);
+  async function writePcPaths() {
+    const el = () => $("#pcPathInfo");
+    const j = await (await fetch(listSheetUrl, { cache: "no-store" })).json();
+    if (!j.ok) throw 0;
+    if ((j.version || 1) < 2) {
+      if (el()) el().innerHTML = "スプシに「PCの場所」も書き込むには、Apps Script を新しいコードに更新してください（スマホの「選んだ写真」画面に手順があります）。";
+      return;
+    }
+    const found = new Map();
+    for (const m of matches) if (m.file) found.set(rowKey(m.item), m.file);
+    let n = 0;
+    const rows = j.items.map((r) => {
+      const f = found.get(rowKey(r));
+      if (f) { n++; return { ...r, pc: f.path.replace(/\//g, "\\"), dims: r.dims || (f.dims ? f.dims.join("×") : ""), model: r.model || f.model || "" }; }
+      return r;
+    });
+    const res = await (await fetch(listSheetUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ items: rows }) })).json();
+    if (!res.ok) throw 0;
+    if (el()) el().textContent = `✓ スプシの「PCの場所」に ${n}枚分を書き込みました`;
   }
 
   // ============================================================ B-3. コピー
@@ -320,7 +382,7 @@
     }
     const top = `L版印刷_${LP.stamp()}`;
     const out = await root.getDirectoryHandle(top, { create: true });
-    const dirs = {}, used = new Set(), csv = ["month,file,source"];
+    const dirs = {}, used = new Set(), csv = ["年月,コピー後の名前,元の場所,撮影日時,画像サイズ,機種"];
     let done = 0;
     const errors = [];
     for (const { item, file } of todo) {
@@ -335,7 +397,8 @@
         const w = await (await d.getFileHandle(name, { create: true })).createWritable();
         await w.write(await file.getFile());
         await w.close();
-        csv.push(`${mo},${name},${file.path}`);
+        const q = (v) => `"${String(v || "").replace(/"/g, '""')}"`;
+        csv.push([mo, name, file.path.replace(/\//g, "\\"), item.dt || file.dt || "", item.dims || (file.dims ? file.dims.join("×") : ""), item.model || file.model || ""].map(q).join(","));
         done++;
         say("#destInfo", `コピー中… ${done} / ${todo.length}`);
       } catch (e) {

@@ -103,7 +103,7 @@
     }
     skippedOld += preSkipped;
     if (!files.length) { prog.hidden = true; toast(preSkipped ? `${since.replace("-", "年")}月以降の写真がありませんでした` : "写真が見つかりませんでした"); return; }
-    let added = 0, dup = 0, failed = 0;
+    let added = 0, dup = 0, failed = 0, enriched = 0;
     const firstNewMonth = [];
     const upd = (i) => {
       $("#pFill").style.width = `${(i / files.length) * 100}%`;
@@ -122,11 +122,22 @@
         const hint = f.hint, dirHint = f.dirHint;
         if (f.zip) f = await LP.zipFile(f.zip, f.ent);
         else if (f.file) f = f.file;
-        const dt = await LP.exifDate(f).catch(() => null);
+        const info = await LP.exifInfo(f).catch(() => ({ dt: null, ss: "", model: "" }));
+        const dt = info.dt;
         const month = dirHint || LP.monthFromDt(dt) || LP.monthFromText(f.name) || hint || LP.monthFromTime(f.lastModified);
         if (month < since) { skippedOld++; return; }
         const id = dt ? `${dt}|${LP.stem(f.name)}` : `${LP.stem(f.name)}|${f.size}`;
-        if (byId.has(id)) { dup++; return; }
+        if (byId.has(id)) {
+          dup++;
+          // 取り込み済みでも、詳細（機種・秒以下）が無ければ補う
+          const old = byId.get(id);
+          if (old && (old.model === undefined || old.ss === undefined)) {
+            old.model = info.model; old.ss = info.ss;
+            await idb.put("meta", old);
+            if (old.sel) enriched++;
+          }
+          return;
+        }
         byId.set(id, null); // 同時処理での重複防止
         const img = await LP.decode(f);
         const [w, h] = LP.dims(img);
@@ -134,7 +145,7 @@
         const prev = await LP.resize(img, { long: 1080, q: 0.72 });
         if (img.close) img.close();
         const thumb = await LP.resize(await LP.decode(prev), { short: 240, q: 0.65 });
-        const meta = { id, name: f.name, dt, month, w, h, size: f.size, sel: false, at: Date.now() };
+        const meta = { id, name: f.name, dt, ss: info.ss, model: info.model, month, w, h, size: f.size, sel: false, at: Date.now() };
         const tb = await thumb.arrayBuffer(), pb = await prev.arrayBuffer();
         await idb.tx(["meta", "thumb", "prev"], "readwrite", (m, t, pv) => { m.put(meta); t.put(tb, id); pv.put(pb, id); });
         byId.set(id, meta);
@@ -170,7 +181,7 @@
     await load();
     await adoptOrphans();
     await refresh(true);
-    if (sheetUrl) syncNow();
+    if (sheetUrl) { if (enriched) dirty = true; syncNow(); }
     toast(`${added}枚 取り込みました` + (dup ? `（取り込み済み ${dup}枚はスキップ）` : "") + (skippedOld ? `（期間外 ${skippedOld}枚は除外）` : "") + (failed ? ` ・ 読めない写真 ${failed}枚` : ""));
   }
   $("#pCancel").onclick = () => { cancelImport = true; if ($("#pTitle").dataset.wait) { pickAt = 0; waiting(false); } };
@@ -603,8 +614,8 @@
   });
 
   function buildList() {
-    const items = photos.filter((p) => p.sel).map((p) => ({ name: p.name, dt: p.dt, month: p.month, w: p.w, h: p.h }))
-      .concat(orphans.concat(remoteOnly).map((o) => ({ name: o.name, dt: o.dt || null, month: o.month })));
+    const items = photos.filter((p) => p.sel).map((p) => ({ ...rowOf(p), dt: p.dt || null, w: p.w, h: p.h }))
+      .concat(orphans.concat(remoteOnly).map((o) => ({ ...passRow(o), dt: o.dt || null })));
     return { app: "l-picker", version: 1, created: new Date().toISOString(), since, count: items.length, items };
   }
 
@@ -877,6 +888,7 @@
   //  - この端末で前回の同期より後に付けた ♥ → スプシに追加
   //  - この端末で前回の同期より後に外した ♥ → スプシから外す
   //  - 前回の同期では有ったのにスプシから消えている ♥ → 他の端末で外した → この端末でも外す
+  let sheetVersion = 2;
   let sheetUrl = null, orphans = [], remoteOnly = [], unsel = {}, syncTimer, syncing = false, dirty = false;
   // 写真の見分け方: 撮影日時＋ファイル名（同じ秒に撮った連写も別の写真として扱う）
   const skey = (it) => (it.dt ? `${it.dt}|${LP.stem(it.name)}` : `${LP.stem(it.name)}|${it.month}`);
@@ -889,7 +901,17 @@
     }
     return (r) => byKey.get(skey(r)) || (r.dt && byDt.get(r.dt)?.length === 1 ? byDt.get(r.dt)[0] : null);
   }
-  const rowOf = (p) => ({ month: p.month, name: p.name, dt: p.dt || "", at: new Date(p.selAt || p.at || Date.now()).toISOString() });
+  // スプシ1行分（ファイル名だけでは見分けにくいので詳細もつける）
+  const rowOf = (p, r) => ({
+    month: p.month, name: p.name, dt: p.dt || "", at: new Date(p.selAt || p.at || Date.now()).toISOString(),
+    dims: p.w && p.h ? `${p.w}×${p.h}` : (r && r.dims) || "",
+    orient: p.w && p.h ? (p.w > p.h ? "横" : p.w < p.h ? "縦" : "正方形") : (r && r.orient) || "",
+    model: p.model || (r && r.model) || "",
+    ss: p.ss || (r && r.ss) || "",
+    bytes: LP.fmtBytes(p.size) || (r && r.bytes) || "",
+    pc: (r && r.pc) || p.pc || "",
+  });
+  const passRow = (r) => ({ month: r.month, name: r.name, dt: r.dt || "", at: r.at || "", dims: r.dims || "", orient: r.orient || "", model: r.model || "", ss: r.ss || "", bytes: r.bytes || "", pc: r.pc || "" });
 
   function setCloud(state, msg) {
     const el = $("#cloud");
@@ -915,6 +937,9 @@
     const r = await fetch(url, { cache: "no-store", signal: LP.abortAfter(30000) });
     const j = await r.json();
     if (!j.ok) throw new Error("ng");
+    sheetVersion = j.version || 1;
+    const note = $("#gsUpdate");
+    if (note) note.hidden = sheetVersion >= 2;
     return (j.items || []).filter((it) => it.name);
   }
   async function syncNow() {
@@ -954,8 +979,8 @@
         if (unsel[k] > lastSync || unsel[r.dt || ""] > lastSync) continue;   // この端末で外した
         if (p) {
           if (!p.sel) { p.sel = true; p.synced = true; p.selAt = Math.min(Date.parse(r.at) || 0, start - 1) || start - 1; await idb.put("meta", p); changed++; }
-          result.set(k, rowOf(p));
-        } else result.set(k, { month: r.month, name: r.name, dt: r.dt || "", at: r.at || "" });
+          result.set(k, rowOf(p, r));
+        } else result.set(k, passRow(r));
       }
       for (const p of photos) {
         if (!p.sel) continue;
@@ -966,7 +991,7 @@
       }
       for (const o of orphans) {
         const k = skey(o);
-        if (!result.has(k) && !(unsel[k] > lastSync)) result.set(k, { month: o.month, name: o.name, dt: o.dt || "", at: o.at || new Date().toISOString() });
+        if (!result.has(k) && !(unsel[k] > lastSync)) result.set(k, passRow({ ...o, at: o.at || new Date().toISOString() }));
       }
       const localKeys = new Set(photos.map(skey));
       remoteOnly = [...result.entries()].filter(([k]) => !localKeys.has(k)).map(([, v]) => v);

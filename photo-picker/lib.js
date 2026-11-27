@@ -2,6 +2,7 @@
 /* 共通: EXIF日時 / 年月判定 / IndexedDB / 画像縮小 */
 const LP = (() => {
   // ---------------------------------------------------------- EXIF
+  // 撮影日時・秒以下・機種を読む
   function parseTiff(dv, t) {
     const le = dv.getUint16(t) === 0x4949;
     const u16 = (o) => dv.getUint16(t + o, le);
@@ -10,8 +11,9 @@ const LP = (() => {
     const ascii = (off, n) => {
       let s = "";
       for (let i = 0; i < n; i++) { const c = dv.getUint8(t + off + i); if (!c) break; s += String.fromCharCode(c); }
-      return s;
+      return s.trim();
     };
+    const WANT = new Set([0x010f, 0x0110, 0x0132, 0x9003, 0x9291]);
     const readIfd = (off) => {
       const out = {};
       const n = u16(off);
@@ -19,30 +21,68 @@ const LP = (() => {
         const e = off + 2 + i * 12;
         const tag = u16(e), type = u16(e + 2), cnt = u32(e + 4);
         if (tag === 0x8769) out.exif = u32(e + 8);
-        else if ((tag === 0x0132 || tag === 0x9003) && type === 2) out[tag] = ascii(cnt > 4 ? u32(e + 8) : e + 8, cnt);
+        else if (WANT.has(tag) && type === 2) { try { out[tag] = ascii(cnt > 4 ? u32(e + 8) : e + 8, cnt); } catch {} }
       }
       return out;
     };
     const ifd0 = readIfd(u32(4));
-    let dt = ifd0[0x0132];
-    if (ifd0.exif) { const ex = readIfd(ifd0.exif); if (ex[0x9003]) dt = ex[0x9003]; }
-    return dt && /^\d{4}:\d\d:\d\d \d\d:\d\d:\d\d/.test(dt) && !dt.startsWith("0000") ? dt.slice(0, 19) : null;
+    const ex = ifd0.exif ? readIfd(ifd0.exif) : {};
+    let dt = ex[0x9003] || ifd0[0x0132];
+    dt = dt && /^\d{4}:\d\d:\d\d \d\d:\d\d:\d\d/.test(dt) && !dt.startsWith("0000") ? dt.slice(0, 19) : null;
+    const make = ifd0[0x010f] || "", model = ifd0[0x0110] || "";
+    return {
+      dt,
+      ss: (ex[0x9291] || "").replace(/\D/g, ""),
+      model: model.startsWith(make) || !make ? model : `${make} ${model}`,
+    };
   }
 
   // JPEG/HEIC どちらも "Exif\0\0" の後ろに TIFF がある
-  async function exifDate(file) {
+  async function exifInfo(file) {
     for (const len of [256 * 1024, 2 * 1024 * 1024]) {
       const buf = await file.slice(0, len).arrayBuffer();
       const u8 = new Uint8Array(buf), dv = new DataView(buf);
       for (let i = 0; i < u8.length - 14; i++) {
         if (u8[i] === 0x45 && u8[i + 1] === 0x78 && u8[i + 2] === 0x69 && u8[i + 3] === 0x66 && u8[i + 4] === 0 && u8[i + 5] === 0) {
-          try { const r = parseTiff(dv, i + 6); if (r) return r; } catch {}
+          try { const r = parseTiff(dv, i + 6); if (r && r.dt) return r; } catch {}
         }
       }
       if (file.size <= len) break;
     }
+    return { dt: null, ss: "", model: "" };
+  }
+  const exifDate = async (file) => (await exifInfo(file)).dt;
+
+  // 画像の縦横ピクセル数（ファイルの先頭だけ読む。回転前のサイズ）
+  async function imageDims(file) {
+    try {
+      const buf = await file.slice(0, 512 * 1024).arrayBuffer();
+      const u8 = new Uint8Array(buf), dv = new DataView(buf);
+      if (u8[0] === 0xff && u8[1] === 0xd8) {                       // JPEG: SOF
+        let p = 2;
+        while (p + 9 < u8.length) {
+          if (u8[p] !== 0xff) { p++; continue; }
+          const m = u8[p + 1], len = dv.getUint16(p + 2);
+          if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return [dv.getUint16(p + 7), dv.getUint16(p + 5)];
+          p += 2 + len;
+        }
+      } else if (u8[0] === 0x89 && u8[1] === 0x50) {                // PNG: IHDR
+        return [dv.getUint32(16), dv.getUint32(20)];
+      } else {                                                      // HEIC: いちばん大きい ispe
+        let best = null;
+        for (let i = 4; i < u8.length - 16; i++) {
+          if (u8[i] === 0x69 && u8[i + 1] === 0x73 && u8[i + 2] === 0x70 && u8[i + 3] === 0x65) {
+            const w = dv.getUint32(i + 8), h = dv.getUint32(i + 12);
+            if (w > 0 && h > 0 && w < 100000 && h < 100000 && (!best || w * h > best[0] * best[1])) best = [w, h];
+          }
+        }
+        if (best) return best;
+      }
+    } catch {}
     return null;
   }
+  const sameDims = (a, b) => !!(a && b && ((a[0] === b[0] && a[1] === b[1]) || (a[0] === b[1] && a[1] === b[0])));
+  const fmtBytes = (n) => (!n ? "" : n >= 1048576 ? `${(n / 1048576).toFixed(1)}MB` : `${Math.round(n / 1024)}KB`);
 
   // 縮小JPEGに撮影日時を書き込む (スマホに移しても月がわかるように)
   async function withExifDate(blob, dt) {
@@ -267,7 +307,7 @@ const LP = (() => {
     return c.signal;
   }
 
-  return { timeout, abortAfter, ZipWriter, zipComplete, zipEntries, zipFile, isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
+  return { exifInfo, imageDims, sameDims, fmtBytes, timeout, abortAfter, ZipWriter, zipComplete, zipEntries, zipFile, isHeic, exifDate, withExifDate, monthFromText, monthFromDt, monthFromTime, stem, decode, dims, resize, idb, download, stamp };
 })();
 
 // 予期しないエラーを画面に出す（黙って止まらないように）
@@ -293,7 +333,7 @@ const LP = (() => {
 
 // 新しい版が出ていたら自動で読み込み直す（ブラウザに古いページが残っても大丈夫なように）
 (() => {
-  const CUR = "20261121k";
+  const CUR = "20261127a";
   fetch("version.json?t=" + Date.now(), { cache: "no-store" })
     .then((r) => r.json())
     .then(({ v }) => {

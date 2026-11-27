@@ -276,3 +276,5 @@ body.pc { background: var(--bg); }
 .filters button { flex: none; }
 .prunebox { margin: 14px 0; padding: 14px; border-radius: 14px; background: var(--bg); }
 .prunebox p { margin: 6px 0; }
+.warnbox { background: #fff4e5; color: #6b3d00; border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.7; margin-bottom: 10px; }
+@media (prefers-color-scheme: dark) { .warnbox { background: #3a2a12; color: #ffd9a0; } }
