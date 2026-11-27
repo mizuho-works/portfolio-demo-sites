@@ -333,7 +333,7 @@ const LP = (() => {
 
 // 新しい版が出ていたら自動で読み込み直す（ブラウザに古いページが残っても大丈夫なように）
 (() => {
-  const CUR = "20261127k";
+  const CUR = "20261127l";
   fetch("version.json?t=" + Date.now(), { cache: "no-store" })
     .then((r) => r.json())
     .then(({ v }) => {

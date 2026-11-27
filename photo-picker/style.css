@@ -297,3 +297,7 @@ body.pc { background: var(--bg); }
 .cmp-item { position: relative; aspect-ratio: 1; background: var(--cell); overflow: hidden; border-radius: 4px; }
 .cmp-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cmp-item span { position: absolute; left: 0; right: 0; bottom: 0; font-size: 10px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.6)); padding: 8px 3px 2px; font-variant-numeric: tabular-nums; }
+.cmp-grid.big { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.cmp-grid.big .cmp-item { aspect-ratio: auto; height: 200px; }
+.cmp-grid.big .cmp-item span { font-size: 12px; }
+.cmp-item em { position: absolute; left: 0; right: 0; top: 0; font-style: normal; font-size: 11px; color: #fff; background: rgba(46,139,87,.9); padding: 3px 5px; }

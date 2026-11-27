@@ -660,8 +660,8 @@
 
   // アルバムと見比べる：このスマホにある ♥ の写真を撮影日順・月ごとに全部表示
   $("#btnCompare").onclick = () => showPhotoList(photos.filter((p) => p.sel), "♥ の写真（撮影日の古い順）", null);
-  function showPhotoList(src, title, infoText) {
-    const list = src.slice().sort((a, b) => ((a.dt || a.month) + a.name < (b.dt || b.month) + b.name ? -1 : 1));
+  function showPhotoList(src, title, infoText, opts = {}) {
+    const list = opts.keepOrder ? src.slice() : src.slice().sort((a, b) => ((a.dt || a.month) + a.name < (b.dt || b.month) + b.name ? -1 : 1));
     const body = $("#cmpBody");
     const frag = document.createDocumentFragment();
     let cur = null, grid = null, n = 0;
@@ -674,14 +674,15 @@
         h.textContent = `${cur.replace("-", "年")}月　${per[cur]}枚`;
         frag.appendChild(h);
         grid = document.createElement("div");
-        grid.className = "cmp-grid";
+        grid.className = "cmp-grid" + (opts.big ? " big" : "");
         frag.appendChild(grid);
       }
       n++;
       const d = document.createElement("div");
       d.className = "cmp-item";
       const when = p.dt ? p.dt.slice(5, 16).replace(/^(\d\d):(\d\d) /, "$1/$2 ") : `日時なし ${p.name.replace(/\.[^.]+$/, "").slice(0, 14)}`;
-      d.innerHTML = `<img alt="" loading="lazy"><span>${n}. ${when}</span>`;
+      const note = opts.notes && opts.notes.get(p);
+      d.innerHTML = `<img alt="" loading="lazy"><span>${n}. ${when}${opts.big ? "　" + p.name.replace(/\.[^.]+$/, "") : ""}</span>` + (note ? `<em>${note.replace(/[<>&]/g, "")}</em>` : "");
       thumbUrl(p.id).then((u) => { if (u) d.querySelector("img").src = u; });
       d.onclick = () => openViewer([p], 0);
       grid.appendChild(d);
@@ -696,12 +697,16 @@
   function openFindFromUrl() {
     const q = new URL(location.href).searchParams.get("find");
     if (!q) return;
-    const want = q.split(",").map((t) => t.trim()).filter(Boolean).map((t) => { const [n, m] = t.split("@"); return { stem: n.toLowerCase(), month: m || "" }; });
+    const want = q.split(",").map((t) => t.trim()).filter(Boolean).map((t) => { const [main, note] = t.split("~"); const [n, m] = main.split("@"); return { stem: n.toLowerCase(), month: m || "", note: note || "" }; });
     const stemOf = (n) => n.replace(/\.[^.]+$/, "").toLowerCase();
-    const hits = photos.filter((p) => want.some((w) => w.stem === stemOf(p.name) && (!w.month || w.month === p.month)));
+    const hits = [], notes = new Map();
+    for (const w of want) for (const p of photos) {
+      if (w.stem === stemOf(p.name) && (!w.month || w.month === p.month) && !hits.includes(p)) { hits.push(p); if (w.note) notes.set(p, w.note); }
+    }
     const found = new Set(hits.map((p) => stemOf(p.name) + "@" + p.month));
     const notHere = want.filter((w) => ![...found].some((k) => k.startsWith(w.stem + "@") && (!w.month || k.endsWith("@" + w.month))));
-    showPhotoList(hits, "足りない写真", `${hits.length}枚` + (notHere.length ? `（このスマホに無い：${notHere.map((w) => w.stem).join("、")}）` : "") + "　写真アプリのこの日付のあたりで探してください");
+    const withNotes = want.some((w) => w.note);
+    showPhotoList(hits, withNotes ? "正しい ♥ の写真" : "足りない写真", `${hits.length}枚` + (notHere.length ? `（このスマホに無い：${notHere.map((w) => w.stem).join("、")}）` : "") + "　写真アプリのこの日付のあたりで探してください", withNotes ? { keepOrder: true, big: true, notes } : {});
   }
 
   $("#btnExport").onclick = async () => {
