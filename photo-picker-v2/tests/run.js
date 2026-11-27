@@ -1,5 +1,5 @@
 // L版えらび の動作テスト（Playwright）。実際の写真・実際のスプシは使いません。
-// 使い方: cd photo-picker/tests && python3 make_photos.py photos && node run.js
+// 使い方: cd photo-picker-v2/tests && python3 make_photos.py photos && node run.js
 const { chromium, devices } = require("playwright");
 const http = require("http"), fs = require("fs"), path = require("path");
 const gasmock = require("./gasmock");

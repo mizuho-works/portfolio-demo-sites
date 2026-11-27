@@ -33,18 +33,7 @@
     if (!months.includes(curMonth)) curMonth = months[0] || null;
   }
 
-  // ---------------------------------------------------------------- ♥ の履歴（消えても、好きな時点に戻せる）
-  const deviceName = /iPhone|iPad/.test(navigator.userAgent) ? "iPhone" : /Android/.test(navigator.userAgent) ? "Android" : "PC";
-  let evPending = [];
-  async function logEvent(p, on, why) {
-    const ev = { t: Date.now(), k: skey(p), name: p.name, month: p.month, dt: p.dt || "", on: on ? 1 : 0, why, dev: deviceName };
-    try { await idb.put("events", ev); } catch {}
-    evPending.push(ev);
-    if (evPending.length > 5000) evPending = evPending.slice(-5000); // 古いスクリプトで送れない間も増えすぎないように
-    idb.put("kv", evPending, "evPending").catch(() => {});
-  }
-
-  async function setSel(p, on, why = "手動") {
+  async function setSel(p, on) {
     if (inactive) return;
     if (p.sel === on) return;
     p.sel = on;
@@ -56,7 +45,6 @@
     try {
       await idb.put("meta", p);
       markUnsel(p, on);
-      logEvent(p, on, why);
       flashSaved();
       scheduleSync();
     } catch {
@@ -143,8 +131,8 @@
           dup++;
           // 取り込み済みでも、詳細（機種・秒以下）が無ければ補う
           const old = byId.get(id);
-          if (old && (old.model === undefined || old.ss === undefined || old.off === undefined)) {
-            old.model = info.model; old.ss = info.ss; old.off = info.off;
+          if (old && (old.model === undefined || old.ss === undefined)) {
+            old.model = info.model; old.ss = info.ss;
             await idb.put("meta", old);
             if (old.sel) enriched++;
           }
@@ -157,7 +145,7 @@
         const prev = await LP.resize(img, { long: 1080, q: 0.72 });
         if (img.close) img.close();
         const thumb = await LP.resize(await LP.decode(prev), { short: 240, q: 0.65 });
-        const meta = { id, name: f.name, dt, ss: info.ss, model: info.model, off: info.off, month, w, h, size: f.size, sel: false, at: Date.now() };
+        const meta = { id, name: f.name, dt, ss: info.ss, model: info.model, month, w, h, size: f.size, sel: false, at: Date.now() };
         const tb = await thumb.arrayBuffer(), pb = await prev.arrayBuffer();
         await idb.tx(["meta", "thumb", "prev"], "readwrite", (m, t, pv) => { m.put(meta); t.put(tb, id); pv.put(pb, id); });
         byId.set(id, meta);
@@ -636,7 +624,7 @@
     const all = photos.filter((p) => p.sel).concat(extras());
     const withDt = all.filter((p) => p.dt), noDt = all.filter((p) => !p.dt);
     // 「撮影日時|ファイル名（拡張子なし）」。連写など同じ秒の写真は名前で見分ける
-    const lines = [...new Set(withDt.map((p) => (LP.toDeviceTime(p.dt, p.off) || p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3")) + "|" + p.name.replace(/\.[^.]+$/, "")))].sort();
+    const lines = [...new Set(withDt.map((p) => p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3") + "|" + p.name.replace(/\.[^.]+$/, "")))].sort();
     const out = $("#albumResult");
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
@@ -651,7 +639,7 @@
   $("#btnAlbumRest").onclick = async () => {
     const stemOf = (n) => n.replace(/\.[^.]+$/, "");
     const rest = photos.filter((p) => p.sel && (!p.dt || !/^IMG_E?\d{4}$/i.test(stemOf(p.name))));
-    const lines = [...new Set(rest.map((p) => (p.dt ? (LP.toDeviceTime(p.dt, p.off) || p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3")) : `${p.month.replace("-", "/")}/01 00:00:00`) + "|" + stemOf(p.name)))].sort();
+    const lines = [...new Set(rest.map((p) => (p.dt ? p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3") : `${p.month.replace("-", "/")}/01 00:00:00`) + "|" + stemOf(p.name)))].sort();
     const out = $("#albumRestResult"), grid = $("#albumRestGrid");
     if (!lines.length) { out.textContent = "残りの写真はありません"; grid.replaceChildren(); return; }
     try { await navigator.clipboard.writeText(lines.join("\n")); } catch {}
@@ -773,75 +761,6 @@
     showPhotoList(hits, withNotes ? "正しい ♥ の写真" : "足りない写真", `${hits.length}枚` + (notHere.length ? `（このスマホに無い：${notHere.map((w) => w.stem).join("、")}）` : "") + "　写真アプリのこの日付のあたりで探してください", withNotes ? { keepOrder: true, big: true, notes } : {});
   }
 
-  // ---------------------------------------------------------------- 履歴から戻す
-  async function historyInfo() {
-    let evs = [];
-    try { evs = await idb.all("events"); } catch {}
-    return evs.sort((a, b) => a.t - b.t);
-  }
-  $("#histOpen").addEventListener("toggle", async (e) => {
-    if (!e.target.open) return;
-    const evs = await historyInfo();
-    const recent = evs.slice(-30).reverse();
-    $("#histInfo").textContent = evs.length ? `記録 ${evs.length}件（最初：${new Date(evs[0].t).toLocaleString("ja-JP")}）` : "まだ記録がありません（この版から記録を始めます）";
-    $("#histList").innerHTML = recent.map((ev) => `<li>${new Date(ev.t).toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}　${ev.on ? "♥" : "外す"}　${ev.name.replace(/[<>&]/g, "")}<small>（${ev.month}・${ev.why}・${ev.dev}）</small></li>`).join("");
-    if (!$("#histAt").value && evs.length) {
-      const d = new Date(Date.now() - 3600000), p2 = (n) => String(n).padStart(2, "0");
-      $("#histAt").value = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}`;
-    }
-  });
-  $("#btnHistRestore").onclick = async () => {
-    const at = Date.parse($("#histAt").value);
-    if (!at) { toast("戻したい日時を選んでください"); return; }
-    const evs = (await historyInfo()).filter((ev) => ev.t > at);
-    if (!evs.length) { toast("その時点から変わっていません"); return; }
-    // その時点より後の操作を、新しい順に取り消す
-    const target = new Map();
-    for (const ev of evs.slice().reverse()) target.set(ev.k, !ev.on);
-    const byK = new Map(photos.map((p) => [skey(p), p]));
-    const plan = [...target].map(([k, on]) => ({ p: byK.get(k), on })).filter((x) => x.p && x.p.sel !== x.on);
-    if (!plan.length) { toast("戻す必要のある写真はありません"); return; }
-    const add = plan.filter((x) => x.on).length, del = plan.length - add;
-    if (!confirm(`${$("#histAt").value.replace("T", " ")} の状態に戻します。\n♥ を付ける：${add}枚 ／ ♥ を外す：${del}枚`)) return;
-    for (const x of plan) await setSel(x.p, x.on, "履歴から戻す");
-    renderGrid(); renderSummary();
-    toast(`${plan.length}枚を戻しました`);
-  };
-
-  // ---------------------------------------------------------------- GigaFile便と照合
-  $("#btnGiga").onclick = async () => {
-    const url = $("#gigaUrl").value.trim(), out = $("#gigaResult");
-    if (!/^https:\/\/\d+\.gigafile\.nu\/[\w-]+$/.test(url)) { out.textContent = "GigaFile便のURL（https://○○.gigafile.nu/…）を貼ってください"; return; }
-    if (!sheetUrl) { out.textContent = "照合には「スプレッドシートに自動保存」の接続が必要です"; return; }
-    out.textContent = "GigaFile便の一覧を読んでいます…";
-    let files;
-    try {
-      const j = await (await fetch(`${sheetUrl}?gigafile=${encodeURIComponent(url)}`, { signal: LP.abortAfter(60000) })).json();
-      if (!j.ok) throw new Error(j.error || "ng");
-      files = j.files;
-    } catch (e) {
-      out.textContent = sheetVersion < 3 ? "スクリプトが古いので照合できません。Apps Script を新しいコードに更新してください（スプレッドシートに自動保存の欄に手順があります）" : `読めませんでした（${e.message}）`;
-      return;
-    }
-    const want = photos.filter((p) => p.sel).map((p) => ({ p, name: p.name, month: p.month, dt: p.dt, bytes: bytesOf(p) })).concat(extras().map((o) => ({ p: null, name: o.name, month: o.month, dt: o.dt, bytes: o.bytes || "" })));
-    const res = LP.matchFiles(want, files);
-    const lines = [`GigaFile便 ${files.length}個 ／ ♥ ${want.length}枚`];
-    lines.push(res.missing.length ? `\n❌ 足りない ${res.missing.length}枚` : "\n✓ 足りない写真はありません");
-    for (const w of res.missing) lines.push(`　${w.month}　${w.name}${w.dt ? "　" + w.dt.slice(0, 16) : ""}`);
-    if (res.guessed.length) {
-      lines.push(`\n△ 名前が伏せ字で確かめられない ${res.guessed.length}個（数は合っています。念のため中身を見てください）`);
-      for (const w of res.guessed) lines.push(`　${w.month}　${w.name}`);
-    }
-    lines.push(res.extra.length ? `\n❌ 余分 ${res.extra.length}個（GigaFile便の上からの番号）` : "\n✓ 余分なファイルはありません");
-    for (const f of res.extra) lines.push(`　${f.no}番目　${f.hidden ? "（名前が伏せ字）" : f.name}　${f.size}`);
-    out.textContent = lines.join("\n");
-    const local = res.missing.concat(res.guessed).filter((w) => w.p).map((w) => w.p);
-    if (local.length) {
-      $("#gigaShow").hidden = false;
-      $("#gigaShow").onclick = () => showPhotoList(local, "GigaFile便で確かめたい写真", `${local.length}枚（このスマホにある分）`);
-    } else $("#gigaShow").hidden = true;
-  };
-
   $("#btnExport").onclick = async () => {
     const out = $("#exportResult");
     const list = buildList();
@@ -867,7 +786,6 @@
     if (!confirm(`不具合で外れた ${was.length}枚の ♥ を戻します。\n（自分で外した写真は戻しません）`)) return;
     const now = Date.now();
     for (const p of was) {
-      logEvent(p, true, "外れた♥を戻す");
       p.sel = true; p.selAt = now; p.synced = false;
       delete unsel[skey(p)];
       await idb.put("meta", p);
@@ -1170,7 +1088,7 @@
     if (!j.ok) throw new Error("ng");
     sheetVersion = j.version || 1;
     const note = $("#gsUpdate");
-    if (note) note.hidden = sheetVersion >= 3;
+    if (note) note.hidden = sheetVersion >= 2;
     return (j.items || []).filter((it) => it.name);
   }
   async function syncNow() {
@@ -1210,7 +1128,7 @@
         if (result.has(k)) continue;
         if (unsel[k] > lastSync || unsel[r.dt || ""] > lastSync) continue;   // この端末で外した
         if (p) {
-          if (!p.sel) { p.sel = true; p.synced = true; p.selAt = Math.min(Date.parse(r.at) || 0, start - 1) || start - 1; await idb.put("meta", p); changed++; logEvent(p, true, "同期"); }
+          if (!p.sel) { p.sel = true; p.synced = true; p.selAt = Math.min(Date.parse(r.at) || 0, start - 1) || start - 1; await idb.put("meta", p); changed++; }
           result.set(k, rowOf(p, r));
         } else result.set(k, passRow(r));
       }
@@ -1218,7 +1136,7 @@
         if (!p.sel) continue;
         const k = skey(p);
         if (result.has(k)) continue;
-        if (dropIds.has(p.id)) { p.sel = false; await idb.put("meta", p); changed++; logEvent(p, false, "同期"); }   // 他の端末で外された（2回確認済み）
+        if (dropIds.has(p.id)) { p.sel = false; await idb.put("meta", p); changed++; }   // 他の端末で外された（2回確認済み）
         else result.set(k, rowOf(p));                                                    // それ以外はスプシに入れる
       }
       for (const o of orphans) {
@@ -1234,12 +1152,11 @@
       const r = await fetch(sheetUrl, {
         signal: LP.abortAfter(30000),
         method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ items, months: months.map((mo) => ({ month: mo, sel: m[mo].sel, all: m[mo].all })), events: evPending.slice(0, 500) }),
+        body: JSON.stringify({ items, months: months.map((mo) => ({ month: mo, sel: m[mo].sel, all: m[mo].all })) }),
       });
       const j = await r.json();
       if (!j.ok) throw new Error("ng");
       await idb.put("kv", start, "lastSync");
-      if (j.version >= 3) { evPending = evPending.slice(500); await idb.put("kv", evPending, "evPending"); }
       for (const p of photos) if (p.sel && !p.synced && result.has(skey(p)) && (p.selAt || 0) < start) { p.synced = true; await idb.put("meta", p); }
       for (const k of Object.keys(unsel)) if (unsel[k] <= start) delete unsel[k];
       await idb.put("kv", unsel, "unsel");
@@ -1331,7 +1248,6 @@
       orphans = (await idb.get("kv", "orphans")) || [];
       remoteOnly = (await idb.get("kv", "remoteOnly")) || [];
       unsel = (await idb.get("kv", "unsel")) || {};
-      evPending = (await idb.get("kv", "evPending")) || [];
       if (sheetUrl) { $("#sheetUrl").value = sheetUrl; setCloud("ok"); }
       $("#sinceLabel").textContent = `${+since.slice(0, 4)}年${+since.slice(5)}月`;
       curMonth = store.get("month", null);

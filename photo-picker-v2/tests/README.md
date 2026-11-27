@@ -3,14 +3,14 @@
 実際の写真やスプレッドシートは使わず、色の板の写真と偽のスプシで確かめます。
 
 ```bash
-cd photo-picker/tests
+cd photo-picker-v2/tests
 python3 make_photos.py photos   # テスト用の写真（撮影日時・時差つき）を作る（Pillow が必要）
 node run.js                     # スマホ2台・スプシ同期・空読み・履歴から戻す・ショートカット用の時刻・GigaFile便の照合
-node upgrade.js                 # 前の版のデータが新しい版でも残るか
+node shared.js                  # 前の版（photo-picker/）と同じデータを使えて、前の版も壊れないか
 node gas-unit.js                # sheet-sync.gs（Apps Script）の単体テスト
 ```
 
-`run.js` と `upgrade.js` には Playwright（Chromium）が必要です。
+`run.js` と `shared.js` には Playwright（Chromium）が必要です。
 
 ## 何を確かめているか
 

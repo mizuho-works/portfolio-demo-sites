@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L版えらび v2 PC</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css?v=20261127q">
+</head>
+<body class="pc">
+<main class="pcwrap">
+  <header class="pchead">
+    <h1>L版えらび <small>PC ・ v5</small></h1>
+    <a href="./" class="ghost-link">スマホ用の画面へ</a>
+  </header>
+
+  <p id="unsupported" class="warn" hidden>このブラウザはPCのフォルダに書き込めません。<b>Windows の Chrome か Edge</b> で開いてください（読み込みだけならこのままでもできます）。</p>
+
+  <h2 class="part">A. スマホ用の月別ZIPを作る <small>写真がPCにしか無いとき／スマホで何千枚も選ぶと固まるとき</small></h2>
+  <section class="step" id="light">
+    <p>PCの写真を縮小して、<b>1か月ごとに1つのZIP</b>にまとめます（1枚 約0.3MB・撮影日時つき）。スマホでは月ごとに<b>ZIPを1つ選ぶだけ</b>で取り込めます。</p>
+    <label class="row">対象 <span><input id="lightSince" type="month" value="2025-05"> 以降</span></label>
+    <div class="btns">
+      <button id="lightSrc" class="primary">① 写真フォルダを選ぶ</button>
+      <button id="lightGo" class="ghostbtn">② 保存先を選んで作る</button>
+    </div>
+    <label class="alt">①でフォルダを選んでも何も起きないときは → <u>こちらから選ぶ</u><input id="lightSrcAlt" type="file" webkitdirectory multiple hidden></label>
+    <div id="lightInfo" class="info"></div>
+    <p class="note">① では <code>E:\03_年月別バックアップ</code> のような一番上のフォルダを選べば、中の月別フォルダを全部処理します。② の保存先は新しく作ったフォルダ（例: <code>E:\スマホ用</code>）を選んでください（デスクトップやドライブ直下そのものはChromeの制限で選べません）。止まっても、もう一度②を押せば続きから作ります。<br>
+    できたZIPは iCloud Drive / Googleドライブ に入れ、スマホの「PCで作った月別ZIPから取り込む」で選んでください。</p>
+  </section>
+
+  <h2 class="part">B. 選んだ写真をフォルダにまとめる</h2>
+  <section class="step" id="s1">
+    <h2><span>1</span>選んだ写真のリスト</h2>
+    <p>このPCのブラウザで ♥ を付けた場合は上のボタン、スマホで付けた場合はスマホの「リストを送る / 保存」で作った <code>L版リスト_….json</code> を選びます（ドラッグしてもOK）。</p>
+<button id="useLocal" class="primary" hidden>このPCで付けた ♥ を使う（<span id="localCount">0</span>枚）</button>
+    <label class="primary" id="listLabel">リストを選ぶ<input id="listFile" type="file" accept=".json,application/json" hidden></label>
+    <p style="margin:14px 0 6px">☁ スプレッドシートに自動保存している場合は、同じURLを貼るだけ:</p>
+    <div class="urlrow"><input id="sheetUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec"><button id="sheetLoad" class="primary sm">スプシから読み込む</button></div>
+    <div id="listInfo" class="info"></div>
+  </section>
+
+  <section class="step" id="s2">
+    <h2><span>2</span>元の写真フォルダ</h2>
+    <p><code>E:\03_年月別バックアップ</code> など、元の写真が入っている一番上のフォルダを選びます。</p>
+    <button id="pickSrc" class="primary">写真フォルダを選ぶ</button>
+    <label class="alt">選んでも何も起きないときは → <u>こちらから選ぶ</u><input id="pickSrcAlt" type="file" webkitdirectory multiple hidden></label>
+    <div id="srcInfo" class="info"></div>
+    <details class="note iphone-help">
+      <summary>iPhoneの写真をPCにコピーする方法（見つからない写真がiPhoneにしか無いとき）</summary>
+      <ol>
+        <li>iPhoneをケーブルでPCにつなぎ、iPhoneで「このコンピュータを信頼」→パスコード</li>
+        <li>PCのエクスプローラーで「PC」→「Apple iPhone」→「Internal Storage」→「DCIM」を開く</li>
+        <li>中のフォルダのうち、<b>上の「コピーするのは…」に出ている月のフォルダだけ</b>（例: <code>202509__</code>）を、PCの新しいフォルダ（例: <code>E:\iPhoneコピー</code>）にドラッグしてコピー</li>
+        <li>上の「見つからない分を、別のフォルダで探す」でそのフォルダを選ぶ</li>
+      </ol>
+      見つからないのが数枚なら、iPhoneから自分あてにメール・LINE（「オリジナル画質」）・AirDrop などでPCに送って、そのフォルダを選んでもOKです。
+    </details>
+  </section>
+
+  <section class="step" id="s3">
+    <h2><span>3</span>まとめ先を選んでコピー</h2>
+    <p>選んだ場所に <code>L版印刷_日時\年-月\</code> を作って、元の写真（フル画質）をコピーします。新しく作ったフォルダ（例: <code>E:\L版印刷</code>）を選んでください。</p>
+    <button id="pickDest" class="primary">まとめ先を選んでコピー</button>
+    <div id="destInfo" class="info"></div>
+  </section>
+</main>
+<div id="toast" class="toast" hidden></div>
+<script src="lib.js?v=20261127q"></script>
+<script src="pc.js?v=20261127q"></script>
+</body>
+</html>
