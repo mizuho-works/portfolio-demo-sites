@@ -623,7 +623,8 @@
   $("#btnAlbumList").onclick = async () => {
     const all = photos.filter((p) => p.sel).concat(extras());
     const withDt = all.filter((p) => p.dt), noDt = all.filter((p) => !p.dt);
-    const lines = [...new Set(withDt.map((p) => p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3")))].sort();
+    // 「撮影日時|ファイル名（拡張子なし）」。連写など同じ秒の写真は名前で見分ける
+    const lines = [...new Set(withDt.map((p) => p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3") + "|" + p.name.replace(/\.[^.]+$/, "")))].sort();
     const out = $("#albumResult");
     try {
       await navigator.clipboard.writeText(lines.join("\n"));
