@@ -12,7 +12,7 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=20261127e">
+<link rel="stylesheet" href="style.css?v=20261127f">
 </head>
 <body>
 <header class="top">
@@ -127,17 +127,16 @@
       <details>
         <summary>ショートカットの作り方（最初の1回だけ・5分）</summary>
         <ol class="howto">
-          <li>iPhoneの写真アプリで、新しいアルバム「<b>L版印刷</b>」を作っておく（空でOK）</li>
           <li>「ショートカット」アプリ → 右上の <b>＋</b> → 名前を「L版アルバム」にする</li>
           <li>アクションを上から順に追加（検索欄にアクション名を入れて探す）：
             <ol>
               <li><b>クリップボードを取得</b></li>
               <li><b>テキストを分割</b>（区切り：<b>改行</b>）</li>
-              <li><b>各項目を繰り返す</b>　← ここから下は「繰り返す」の中に入れる</li>
+              <li><b>各項目を繰り返す</b>　← 次の3つは「繰り返す」の中に入れる</li>
               <li><b>入力から日付を取得</b>（入力：<b>繰り返し項目</b>）</li>
               <li><b>日付を調整</b>（<b>1 秒</b> を <b>加算</b>、日付：<b>日付</b>）</li>
               <li><b>写真を検索</b>：フィルタを追加 →「<b>作成日</b>」「<b>が次の範囲内</b>」→ 左に <b>日付</b>、右に <b>調整後の日付</b></li>
-              <li><b>アルバムに追加</b>（写真：<b>写真</b>、アルバム：<b>L版印刷</b>）</li>
+              <li><b>写真アルバムを作成</b>　← 「繰り返しの終了」の<b>下</b>に置く。名前：<b>L版印刷</b>、写真：<b>繰り返しの結果</b></li>
             </ol>
           </li>
           <li>このページで「撮影日時のリストをコピー」→ ショートカット「L版アルバム」を実行（▶）</li>
@@ -238,7 +237,7 @@
 
 <div id="toast" class="toast" hidden></div>
 
-<script src="lib.js?v=20261127e"></script>
-<script src="app.js?v=20261127e"></script>
+<script src="lib.js?v=20261127f"></script>
+<script src="app.js?v=20261127f"></script>
 </body>
 </html>
