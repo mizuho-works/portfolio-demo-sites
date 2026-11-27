@@ -694,6 +694,58 @@
     body.scrollTop = 0;
   }
   $("#cmpClose").onclick = () => { $("#compare").hidden = true; };
+  // 入れ替えチェック：左＝今入っている写真（リンクに埋め込み）、右＝あるべき ♥ の写真（このスマホから）
+  function openSwapFromUrl() {
+    const h = location.hash;
+    if (!h.startsWith("#swap=")) return;
+    let rows;
+    try {
+      const b64 = h.slice(6).replace(/-/g, "+").replace(/_/g, "/");
+      const bin = atob(b64);
+      rows = JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))));
+    } catch { toast("リンクを読めませんでした"); return; }
+    const stemOf = (n) => n.replace(/\.[^.]+$/, "").toLowerCase();
+    const done = store.get("swapDone", {});
+    const body = $("#swapBody");
+    const frag = document.createDocumentFragment();
+    const used = new Set();
+    const paint = () => {
+      const n = rows.filter((r) => done[r.key]).length;
+      $("#swapInfo").textContent = `${n} / ${rows.length} 完了　左を外して、右を入れたらボタンを押す（チェックは保存されます）`;
+    };
+    for (const r of rows) {
+      r.key = `${r.name}@${r.month}#${r.label}`;
+      const p = photos.find((x) => !used.has(x) && stemOf(x.name) === r.name.toLowerCase() && x.month === r.month);
+      if (p) used.add(p);
+      const verb = r.img ? (r.del ? "消した" : "入れ替えた") : "追加した";
+      const row = document.createElement("div");
+      row.className = "swap-row" + (done[r.key] ? " done" : "");
+      const when = p && p.dt ? p.dt.slice(5, 16).replace(/^(\d\d):(\d\d) /, "$1/$2 ") : (p ? "日時なし" : "このスマホに無い");
+      row.innerHTML = `
+        <div class="swap-cell bad">${r.img ? `<img src="${r.img}" alt="">` : `<div class="swap-none">（入っていない）</div>`}
+          <div class="cap"><b>${r.img ? (r.del ? "消す（元の写真）" : "今入っている") : "足りない"}</b><br>${r.label.replace(/[<>&]/g, "")}</div></div>
+        <div class="swap-arrow">→</div>
+        <div class="swap-cell good"><img alt=""><div class="cap"><b>${r.del ? "残す ♥（編集版）" : "あるべき ♥"}</b><br>${r.name.replace(/[<>&]/g, "")}<br>${when}</div></div>
+        <button class="swap-btn">${done[r.key] ? "✓ " + verb : verb}</button>`;
+      if (p) {
+        thumbUrl(p.id).then((u) => { if (u) row.querySelector(".good img").src = u; });
+        row.querySelector(".good img").onclick = () => openViewer([p], 0);
+      }
+      row.querySelector(".swap-btn").onclick = () => {
+        done[r.key] = !done[r.key];
+        store.set("swapDone", done);
+        row.classList.toggle("done", !!done[r.key]);
+        row.querySelector(".swap-btn").textContent = done[r.key] ? "✓ " + verb : verb;
+        paint();
+      };
+      frag.appendChild(row);
+    }
+    body.replaceChildren(frag);
+    paint();
+    $("#swap").hidden = false;
+  }
+  $("#swapClose").onclick = () => { $("#swap").hidden = true; history.replaceState(null, "", location.pathname + location.search); };
+
   function openFindFromUrl() {
     const q = new URL(location.href).searchParams.get("find");
     if (!q) return;
@@ -1209,6 +1261,7 @@
       await resumePosition();
       if (sheetUrl) syncNow();
       openFindFromUrl();
+      openSwapFromUrl();
     } catch (e) {
       if (e && e.name === "StorageStall") { showStorageHelp("stall"); return; }
       $("#empty").hidden = false;
