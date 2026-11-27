@@ -223,7 +223,7 @@
   function extras() {
     const seen = new Set(), out = [];
     for (const o of (typeof remoteOnly === "undefined" ? [] : remoteOnly).concat(typeof orphans === "undefined" ? [] : orphans)) {
-      const k = (o.dt || "") + "|" + o.name + "|" + o.month;
+      const k = (o.dt || "") + "|" + o.name + "|" + o.month + "|" + (o.dt ? "" : o.bytes || "");
       if (!seen.has(k)) { seen.add(k); out.push(o); }
     }
     return out;
@@ -891,7 +891,10 @@
   let sheetVersion = 2;
   let sheetUrl = null, orphans = [], remoteOnly = [], unsel = {}, syncTimer, syncing = false, dirty = false;
   // 写真の見分け方: 撮影日時＋ファイル名（同じ秒に撮った連写も別の写真として扱う）
-  const skey = (it) => (it.dt ? `${it.dt}|${LP.stem(it.name)}` : `${LP.stem(it.name)}|${it.month}`);
+  // 撮影日時が無い写真は、同じ名前が何枚もあることがあるのでファイルサイズも使う
+  const bytesOf = (it) => it.bytes || LP.fmtBytes(it.size) || "";
+  const skey = (it) => (it.dt ? `${it.dt}|${LP.stem(it.name)}` : `${LP.stem(it.name)}|${it.month}|${bytesOf(it)}`);
+  const legacyKey = (it) => `${LP.stem(it.name)}|${it.month}`;
   // スプシの行 → この端末の写真（名前が変わっていても、同じ撮影日時の写真が1枚だけならそれ）
   function indexer() {
     const byKey = new Map(), byDt = new Map();
@@ -899,7 +902,11 @@
       byKey.set(skey(p), p);
       if (p.dt) (byDt.get(p.dt) || byDt.set(p.dt, []).get(p.dt)).push(p);
     }
-    return (r) => byKey.get(skey(r)) || (r.dt && byDt.get(r.dt)?.length === 1 ? byDt.get(r.dt)[0] : null);
+    const byLegacy = new Map();
+    for (const p of photos) if (!p.dt) (byLegacy.get(legacyKey(p)) || byLegacy.set(legacyKey(p), []).get(legacyKey(p))).push(p);
+    return (r) => byKey.get(skey(r)) ||
+      (r.dt && byDt.get(r.dt)?.length === 1 ? byDt.get(r.dt)[0] : null) ||
+      (!r.dt && !r.bytes && byLegacy.get(legacyKey(r))?.length === 1 ? byLegacy.get(legacyKey(r))[0] : null);
   }
   // スプシ1行分（ファイル名だけでは見分けにくいので詳細もつける）
   const rowOf = (p, r) => ({
@@ -955,9 +962,10 @@
       const match = indexer();
       // この端末で送信済みの ♥ のうち、スプシに見当たらないもの（＝他の端末で外された？）
       const missing = (rows) => {
-        const seen = new Set();
-        for (const r of rows) { const p = match(r); seen.add(p ? p.id : "r:" + skey(r)); }
-        return photos.filter((p) => p.sel && p.synced && (p.selAt || p.at || 0) < lastSync && !seen.has(p.id));
+        const seen = new Set(), noDate = new Set();
+        for (const r of rows) { const p = match(r); seen.add(p ? p.id : "r:" + skey(r)); if (!r.dt) noDate.add(legacyKey(r)); }
+        // 撮影日時なし・同じ名前の写真は、前の版では1行にまとまっていたので「外された」とはみなさない
+        return photos.filter((p) => p.sel && p.synced && (p.selAt || p.at || 0) < lastSync && !seen.has(p.id) && !(!p.dt && noDate.has(legacyKey(p))));
       };
       let drops = missing(remote);
       if (drops.length) {

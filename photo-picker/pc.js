@@ -9,7 +9,7 @@
   const say = (sel, html) => { const el = $(sel); el.innerHTML = html; el.scrollIntoView({ block: "nearest" }); };
   const ym = (m) => m.replace("-", "年").replace(/-?(\d+)$/, (_, d) => `${+d}月`);
 
-  let list = null, listSheetUrl = null;     // {items:[{name, dt, month}]}
+  let list = null, listSheetUrl = null, usedFiles = new Set();     // {items:[{name, dt, month}]}
   let srcFiles = null, srcName = "";
   let matches = null;  // [{item, file|null}]
   let lightFiles = null, lightName = "";
@@ -110,7 +110,9 @@
     const d = itemDims(it);
     if (l.length > 1 && d) { const x = []; for (const f of l) if (LP.sameDims(await fileDims(f), d)) x.push(f); if (x.length) l = x; }
     if (l.length > 1 && it.model) { await Promise.all(l.map(fileInfo)); const x = l.filter((f) => f.model && f.model === it.model); if (x.length) l = x; }
-    return l;
+    if (l.length > 1 && it.bytes) { const x = []; for (const f of l) if (LP.fmtBytes((await f.getFile()).size) === it.bytes) x.push(f); if (x.length) l = x; }
+    // すでに別の写真に使ったファイルは後回し（同じ名前の写真が2枚あっても同じファイルにしない）
+    return l.filter((f) => !usedFiles.has(f)).concat(l.filter((f) => usedFiles.has(f)));
   }
 
   // ============================================================ A. 月別ZIP
@@ -301,8 +303,11 @@
     if (!more || !matches) matches = list.items.map((item) => ({ item, file: null }));
     const todo = matches.filter((m) => !m.file);
     let i = 0, gained = 0;
+    usedFiles = new Set(matches.filter((m) => m.file).map((m) => m.file));
     for (const m of todo) {
       m.file = await findFile(m.item, byStem);
+      if (m.file && usedFiles.has(m.file)) m.file = null; // 同じファイルを2回使わない
+      if (m.file) usedFiles.add(m.file);
       if (m.file) gained++;
       if (++i % 5 === 0) say("#srcInfo", `照合しています… ${i} / ${todo.length}`);
     }
@@ -379,7 +384,7 @@
   }
 
   // 見つかった写真のPCの場所をスプシに書き込む（同じ名前の写真があっても、どれか分かるように）
-  const rowKey = (r) => (r.dt ? `${r.dt}|${LP.stem(r.name)}` : `${LP.stem(r.name)}|${r.month}`);
+  const rowKey = (r) => (r.dt ? `${r.dt}|${LP.stem(r.name)}` : `${LP.stem(r.name)}|${r.month}|${r.bytes || ""}`);
   async function writePcPaths(url) {
     const el = () => $("#pcPathInfo");
     const j = await (await fetch(url, { cache: "no-store" })).json();
