@@ -635,20 +635,27 @@
     }
   };
 
-  // 残りの写真（撮影日時が無い・名前が変わっている）→「その月の1日|名前」または「撮影日時|名前」で、1か月の幅で探す
+  // 残りの写真（撮影日時が無い・名前が変わっている）。このスマホにある写真だけ（他の端末の分は除く）
   $("#btnAlbumRest").onclick = async () => {
-    const all = photos.filter((p) => p.sel).concat(extras());
     const stemOf = (n) => n.replace(/\.[^.]+$/, "");
-    const rest = all.filter((p) => !p.dt || !/^IMG_E?\d{4}$/i.test(stemOf(p.name)));
+    const rest = photos.filter((p) => p.sel && (!p.dt || !/^IMG_E?\d{4}$/i.test(stemOf(p.name))));
     const lines = [...new Set(rest.map((p) => (p.dt ? p.dt.replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3") : `${p.month.replace("-", "/")}/01 00:00:00`) + "|" + stemOf(p.name)))].sort();
-    const out = $("#albumRestResult");
-    if (!lines.length) { out.textContent = "残りの写真はありません"; return; }
-    try {
-      await navigator.clipboard.writeText(lines.join("\n"));
-      out.textContent = `✓ ${lines.length}枚分をコピーしました。ショートカット「L判アルバム 残り」を実行してください。\n\n` + rest.map((p) => `${p.month.replace("-", "/")}　${p.name}`).join("\n");
-    } catch {
-      out.textContent = "コピーできませんでした。もう一度押してください。";
+    const out = $("#albumRestResult"), grid = $("#albumRestGrid");
+    if (!lines.length) { out.textContent = "残りの写真はありません"; grid.replaceChildren(); return; }
+    try { await navigator.clipboard.writeText(lines.join("\n")); } catch {}
+    out.textContent = `✓ ${lines.length}枚分をコピーしました。\n時間がかかる・止まるときは、下の写真を見て、写真アプリのその月から手で探してアルバムに追加してください。`;
+    // 写真つきで一覧表示（写真アプリで目で探せるように）
+    const frag = document.createDocumentFragment();
+    for (const p of rest.sort((a, b) => (a.month + a.name < b.month + b.name ? -1 : 1))) {
+      const d = document.createElement("div");
+      d.className = "rest-item";
+      const when = p.dt ? p.dt.slice(0, 16).replace(/^(\d{4}):(\d\d):(\d\d)/, "$1/$2/$3") : `${p.month.replace("-", "年")}月ごろ`;
+      d.innerHTML = `<img alt=""><div><b>${when}</b><br><small>${p.name.replace(/[<>&]/g, "")}</small></div>`;
+      thumbUrl(p.id).then((u) => { if (u) d.querySelector("img").src = u; });
+      d.querySelector("img").onclick = () => { closeSheet(); openViewer([p], 0); };
+      frag.appendChild(d);
     }
+    grid.replaceChildren(frag);
   };
 
   $("#btnExport").onclick = async () => {

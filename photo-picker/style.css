@@ -284,3 +284,6 @@ body.pc { background: var(--bg); }
 .iphone-help ol { padding-left: 20px; }
 .albumbox { border: 2px solid var(--ink); margin-top: 14px; }
 .howto ol { padding-left: 18px; margin: 4px 0; }
+.rest-grid { display: grid; gap: 8px; margin-top: 8px; }
+.rest-item { display: flex; gap: 10px; align-items: center; font-size: 13px; }
+.rest-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; background: var(--cell); flex: none; cursor: pointer; }
