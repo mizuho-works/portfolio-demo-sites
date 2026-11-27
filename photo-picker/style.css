@@ -278,3 +278,7 @@ body.pc { background: var(--bg); }
 .prunebox p { margin: 6px 0; }
 .warnbox { background: #fff4e5; color: #6b3d00; border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.7; margin-bottom: 10px; }
 @media (prefers-color-scheme: dark) { .warnbox { background: #3a2a12; color: #ffd9a0; } }
+.morebox { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--bg); }
+.ghostbtn.sm, .primary.sm { padding: 7px 14px; font-size: 13px; margin-top: 6px; }
+.iphone-help { margin-top: 10px; }
+.iphone-help ol { padding-left: 20px; }

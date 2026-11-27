@@ -288,29 +288,57 @@
     e.target.value = "";
   });
 
-  async function runMatch() {
-    say("#srcInfo", `${srcFiles.length}枚の中から照合しています…`);
+  // more = true: 見つかった分はそのままにして、見つからない分だけ新しいフォルダで探す
+  async function runMatch(more) {
+    const pool = srcFiles;
+    say("#srcInfo", `${pool.length}枚の中から照合しています…`);
     const byStem = new Map();
-    for (const f of srcFiles) {
+    for (const f of pool) {
       const s = LP.stem(f.name);
       if (!byStem.has(s)) byStem.set(s, []);
       byStem.get(s).push(f);
     }
-    matches = [];
-    let i = 0;
-    for (const it of list.items) {
-      matches.push({ item: it, file: await findFile(it, byStem) });
-      if (++i % 10 === 0) say("#srcInfo", `照合しています… ${i} / ${list.items.length}`);
+    if (!more || !matches) matches = list.items.map((item) => ({ item, file: null }));
+    const todo = matches.filter((m) => !m.file);
+    let i = 0, gained = 0;
+    for (const m of todo) {
+      m.file = await findFile(m.item, byStem);
+      if (m.file) gained++;
+      if (++i % 5 === 0) say("#srcInfo", `照合しています… ${i} / ${todo.length}`);
     }
+    showMatch(more ? gained : null);
+    $("#s2").classList.add("done");
+    const url = sheetUrlForWrite();
+    if (url) writePcPaths(url).catch((e) => { const el = $("#pcPathInfo"); if (el) el.textContent = `⚠ スプシに書き込めませんでした（${e && e.message || e}）`; });
+  }
+  const sheetUrlForWrite = () => { try { return listSheetUrl || localStorage.getItem("lp.sheetUrl") || null; } catch { return listSheetUrl; } };
+  function showMatch(gained) {
     const miss = matches.filter((m) => !m.file);
-    say("#srcInfo", `<b>✓ ${matches.length - miss.length} / ${matches.length}枚</b> 見つかりました（${esc(srcName)}）` +
+    const desc = (it) => `${it.name}　${it.dt || it.month}${it.dims ? "　" + it.dims : ""}${it.model ? "　" + it.model : ""}`;
+    say("#srcInfo", `<b>✓ ${matches.length - miss.length} / ${matches.length}枚</b> 見つかりました` +
+      (gained !== null ? `（今回のフォルダで ${gained}枚 追加）` : `（${esc(srcName)}）`) +
       (miss.length ? `<details open><summary>見つからない ${miss.length}枚</summary><ul>${miss.map((m) =>
         `<li>${esc(m.item.name)} <small>${esc(m.item.dt || m.item.month)}${m.item.dims ? " ・ " + esc(m.item.dims) : ""}${m.item.model ? " ・ " + esc(m.item.model) : ""}</small></li>`).join("")}</ul>
-        <small>別のフォルダにあるかもしれません。もっと上のフォルダを選び直してみてください。</small></details>` : "") +
+        <button id="copyMiss" class="ghostbtn sm">この一覧をコピー</button></details>
+        <div class="morebox"><b>見つからない分を、別のフォルダで探す</b>（見つかった分はそのまま）<br>
+        <small>iPhoneの写真は、いったんPCのフォルダにコピーしてから選んでください（下の手順）。</small><br>
+        <button id="pickMore" class="primary sm">別のフォルダを選ぶ</button>
+        <label class="alt">選んでも何も起きないときは → <u>こちらから選ぶ</u><input id="pickMoreAlt" type="file" webkitdirectory multiple hidden></label></div>` : "") +
       (matches.length > miss.length ? "<br>次に <b>3. まとめ先を選んでコピー</b> を押してください。" : "") +
-      (listSheetUrl ? `<div id="pcPathInfo" class="note">スプシに「PCの場所」を書き込んでいます…</div>` : ""));
-    $("#s2").classList.add("done");
-    if (listSheetUrl) writePcPaths().catch(() => {});
+      (sheetUrlForWrite() ? `<div id="pcPathInfo" class="note">スプシに「PCの場所」を書き込んでいます…</div>` : ""));
+    if (!miss.length) return;
+    $("#copyMiss").onclick = async () => {
+      try { await navigator.clipboard.writeText(miss.map((m) => desc(m.item)).join("\n")); $("#copyMiss").textContent = "✓ コピーしました"; } catch {}
+    };
+    const more = async (res) => {
+      if (!res) return;
+      if (!res.files.length) { say("#srcInfo", `⚠ 「${esc(res.name)}」に写真がありませんでした。`); setTimeout(() => showMatch(null), 2500); return; }
+      srcName = res.name;
+      srcFiles = res.files;
+      await runMatch(true);
+    };
+    $("#pickMore").onclick = async () => more(await chooseFolder("#srcInfo", "2000-01", "lp-more"));
+    $("#pickMoreAlt").addEventListener("change", (e) => { const fl = e.target.files; if (fl.length) more({ name: rootName(fl), files: fromInput(fl, "2000-01") }); });
   }
 
   async function findFile(it, byStem) {
@@ -344,9 +372,9 @@
 
   // 見つかった写真のPCの場所をスプシに書き込む（同じ名前の写真があっても、どれか分かるように）
   const rowKey = (r) => (r.dt ? `${r.dt}|${LP.stem(r.name)}` : `${LP.stem(r.name)}|${r.month}`);
-  async function writePcPaths() {
+  async function writePcPaths(url) {
     const el = () => $("#pcPathInfo");
-    const j = await (await fetch(listSheetUrl, { cache: "no-store" })).json();
+    const j = await (await fetch(url, { cache: "no-store" })).json();
     if (!j.ok) throw 0;
     if ((j.version || 1) < 2) {
       if (el()) el().innerHTML = "スプシに「PCの場所」も書き込むには、Apps Script を新しいコードに更新してください（スマホの「選んだ写真」画面に手順があります）。";
@@ -360,7 +388,7 @@
       if (f) { n++; return { ...r, pc: f.path.replace(/\//g, "\\"), dims: r.dims || (f.dims ? f.dims.join("×") : ""), model: r.model || f.model || "" }; }
       return r;
     });
-    const res = await (await fetch(listSheetUrl, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ items: rows }) })).json();
+    const res = await (await fetch(url, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ items: rows }) })).json();
     if (!res.ok) throw 0;
     if (el()) el().textContent = `✓ スプシの「PCの場所」に ${n}枚分を書き込みました`;
   }

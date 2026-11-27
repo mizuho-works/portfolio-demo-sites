@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>L版えらび PC</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css?v=20261127a">
+<link rel="stylesheet" href="style.css?v=20261127b">
 </head>
 <body class="pc">
 <main class="pcwrap">
   <header class="pchead">
-    <h1>L版えらび <small>PC ・ v4</small></h1>
+    <h1>L版えらび <small>PC ・ v5</small></h1>
     <a href="./" class="ghost-link">スマホ用の画面へ</a>
   </header>
 
@@ -47,6 +47,16 @@
     <button id="pickSrc" class="primary">写真フォルダを選ぶ</button>
     <label class="alt">選んでも何も起きないときは → <u>こちらから選ぶ</u><input id="pickSrcAlt" type="file" webkitdirectory multiple hidden></label>
     <div id="srcInfo" class="info"></div>
+    <details class="note iphone-help">
+      <summary>iPhoneの写真をPCにコピーする方法（見つからない写真がiPhoneにしか無いとき）</summary>
+      <ol>
+        <li>iPhoneをケーブルでPCにつなぎ、iPhoneで「このコンピュータを信頼」→パスコード</li>
+        <li>PCのエクスプローラーで「PC」→「Apple iPhone」→「Internal Storage」→「DCIM」を開く</li>
+        <li>中のフォルダ（202505__ や 100APPLE など）を、PCの新しいフォルダ（例: <code>E:\iPhoneコピー</code>）にドラッグしてコピー（枚数が多いと時間がかかります）</li>
+        <li>上の「見つからない分を、別のフォルダで探す」でそのフォルダを選ぶ</li>
+      </ol>
+      見つからないのが数枚なら、iPhoneから自分あてにメール・LINE（「オリジナル画質」）・AirDrop などでPCに送って、そのフォルダを選んでもOKです。
+    </details>
   </section>
 
   <section class="step" id="s3">
@@ -57,7 +67,7 @@
   </section>
 </main>
 <div id="toast" class="toast" hidden></div>
-<script src="lib.js?v=20261127a"></script>
-<script src="pc.js?v=20261127a"></script>
+<script src="lib.js?v=20261127b"></script>
+<script src="pc.js?v=20261127b"></script>
 </body>
 </html>
